@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BACKEND_API_BASE } from "@/libs/backendApiBase";
+import { buildBackendUrl } from "@/libs/backendApiBase";
 
 function getAuthorizationHeader(request: NextRequest) {
   return request.headers.get("authorization");
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`${BACKEND_API_BASE}/auth/me`, {
+    const response = await fetch(buildBackendUrl("/auth/me"), {
       method: "GET",
       headers: {
         Authorization: authorization,
@@ -48,7 +48,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const response = await fetch(`${BACKEND_API_BASE}/auth/me`, {
+    const response = await fetch(buildBackendUrl("/auth/me"), {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

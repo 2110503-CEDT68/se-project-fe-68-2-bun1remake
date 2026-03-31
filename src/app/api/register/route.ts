@@ -11,8 +11,12 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const payload = await res.json().catch(() => null);
+
+    return NextResponse.json(
+      payload ?? { message: "Registration failed." },
+      { status: res.status },
+    );
   } catch {
     return NextResponse.json({ message: "Registration service unavailable." }, { status: 502 });
   }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BACKEND_API_BASE } from "@/libs/backendApiBase";
+import { buildBackendUrl } from "@/libs/backendApiBase";
 
 function getAuthorizationHeader(request: NextRequest) {
   return request.headers.get("authorization");
@@ -32,17 +32,14 @@ export async function PUT(
   try {
     const bookingId = await getBookingId(context);
     const body = await request.json();
-    const response = await fetch(
-      `${BACKEND_API_BASE}/bookings/${encodeURIComponent(bookingId)}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authorization,
-        },
-        body: JSON.stringify(body),
+    const response = await fetch(buildBackendUrl(`/bookings/${encodeURIComponent(bookingId)}`), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorization,
       },
-    );
+      body: JSON.stringify(body),
+    });
     const payload = await response.json().catch(() => null);
 
     return jsonResponse(payload, response.status, "Failed to update booking.");
@@ -66,15 +63,12 @@ export async function DELETE(
 
   try {
     const bookingId = await getBookingId(context);
-    const response = await fetch(
-      `${BACKEND_API_BASE}/bookings/${encodeURIComponent(bookingId)}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: authorization,
-        },
+    const response = await fetch(buildBackendUrl(`/bookings/${encodeURIComponent(bookingId)}`), {
+      method: "DELETE",
+      headers: {
+        Authorization: authorization,
       },
-    );
+    });
     const payload = await response.json().catch(() => null);
 
     return jsonResponse(payload, response.status, "Failed to delete booking.");

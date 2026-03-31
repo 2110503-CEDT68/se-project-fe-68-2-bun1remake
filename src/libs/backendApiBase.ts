@@ -1,4 +1,6 @@
-const DEFAULT_BACKEND_API_BASE = "https://backend-bun1-remake.vercel.app/";
+const DEFAULT_BACKEND_ORIGIN = "https://backend-bun1-remake.vercel.app";
+const DEFAULT_BACKEND_API_PREFIX = "/api/v1";
+const DEFAULT_BACKEND_API_BASE = `${DEFAULT_BACKEND_ORIGIN}${DEFAULT_BACKEND_API_PREFIX}`;
 
 function normalizeBackendApiBase(value: string | undefined) {
   const trimmedValue = value?.trim();
@@ -7,7 +9,18 @@ function normalizeBackendApiBase(value: string | undefined) {
     return DEFAULT_BACKEND_API_BASE;
   }
 
-  return trimmedValue.replace(/\/+$/, "");
+  try {
+    const url = new URL(trimmedValue);
+
+    url.pathname =
+      url.pathname === "/" ? DEFAULT_BACKEND_API_PREFIX : url.pathname.replace(/\/+$/, "");
+    url.search = "";
+    url.hash = "";
+
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return trimmedValue.replace(/\/+$/, "");
+  }
 }
 
 export const BACKEND_API_BASE = normalizeBackendApiBase(

@@ -1,9 +1,10 @@
 import { SingleHotelJson } from "@/interface";
+import { buildBackendUrl } from "@/libs/backendApiBase";
 
 export default async function getVenue(vid: string) {
   // const hotel = hotels.data.find((h) => h.id === vid || h._id === vid);
   // return { success: !!hotel, data: hotel ?? null };
-  const response = await fetch(`https://backend-bun1-remake.vercel.app/api/v1/hotels/${vid}`,
+  const response = await fetch(buildBackendUrl(`/hotels/${encodeURIComponent(vid)}`),
     {cache: "no-store"},
 
   );

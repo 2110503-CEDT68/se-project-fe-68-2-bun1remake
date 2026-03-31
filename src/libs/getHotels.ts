@@ -1,4 +1,5 @@
 import { HotelJson } from "../interface";
+import { buildBackendUrl } from "@/libs/backendApiBase";
 
 interface GetHotelsOptions {
   noStore?: boolean;
@@ -6,7 +7,7 @@ interface GetHotelsOptions {
 
 export default async function getVenues(options?: GetHotelsOptions) {
   const response = await fetch(
-    "https://backend-bun1-remake.vercel.app/api/v1/hotels",
+    buildBackendUrl("/hotels"),
     options?.noStore ? { cache: "no-store" } : { next: { revalidate: 60 } },
   );
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BACKEND_API_BASE } from "@/libs/backendApiBase";
+import { buildBackendUrl } from "@/libs/backendApiBase";
 
 function getAuthorizationHeader(request: NextRequest) {
   return request.headers.get("authorization");
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`${BACKEND_API_BASE}/bookings`, {
+    const response = await fetch(buildBackendUrl("/bookings"), {
       method: "GET",
       headers: {
         Authorization: authorization,
@@ -57,17 +57,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(
-      `${BACKEND_API_BASE}/hotels/${encodeURIComponent(hotelId)}/bookings`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: authorization,
-        },
-        body: JSON.stringify(bookingPayload),
+    const response = await fetch(buildBackendUrl(`/hotels/${encodeURIComponent(hotelId)}/bookings`), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: authorization,
       },
-    );
+      body: JSON.stringify(bookingPayload),
+    });
     const payload = await response.json().catch(() => null);
 
     return jsonResponse(payload, response.status, "Failed to create booking.");
