@@ -1,2 +1,2 @@
-
-USe this Vercel URL!!! : https://fe-project-68-bun1-return.vercel.app/
+Frontend : https://github.com/PPzazaskbd/Frontend-Bun1Remake
+Backend  : https://github.com/PPzazaskbd/Backend-Bun1Remake
