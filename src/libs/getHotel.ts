@@ -1,7 +1,7 @@
 import { SingleHotelJson } from "@/interface";
 import { buildBackendUrl } from "@/libs/backendApiBase";
 
-export default async function getVenue(vid: string) {
+export default async function getHotel(hid: string) {
   try {
     const response = await fetch(buildBackendUrl(`/hotels/${encodeURIComponent(vid)}`), {
       cache: "no-store",
