@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env
+.env.local
+.vercel
+tsconfig.tsbuildinfo
+.codex-frontend.out.log
+.codex-frontend.err.log
+PLANS.md
+present.md
+.DS_store
