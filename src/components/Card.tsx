@@ -7,6 +7,8 @@ interface CardProps {
   province: string;
   price: number;
   imgSrc?: string;
+  id?: string;
+  onDelete?: (id:string) => void;
 }
 
 export default function Card({
@@ -16,6 +18,8 @@ export default function Card({
   province,
   price,
   imgSrc,
+  id,
+  onDelete
 }: CardProps) {
   return (
     <article className="figma-card-surface border border-[rgba(171,25,46,0.08)] bg-[#fff8f3]">
@@ -35,6 +39,13 @@ export default function Card({
           )}
         </div>
       </Link>
+      {/* <button onClick={(e) => {
+        e.preventDefault();
+        if (!id) return;
+        onDelete?.(id)
+      }}>
+        Delete
+      </button> */}
 
       <div className="flex items-end justify-between gap-4 px-5 py-4 sm:px-6">
         <div className="min-w-0">

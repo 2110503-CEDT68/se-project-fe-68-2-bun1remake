@@ -14,6 +14,7 @@ import {
   getDateRangeFromSearchParams,
   normalizeDateRange,
 } from "@/libs/dateRangeParams";
+import { deleteHotel } from "@/libs/deleteHotel";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -30,7 +31,7 @@ function isEditableTarget(target: EventTarget | null) {
 
 export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   const { data: session } = useSession();
-  const hotels = hotelsJson.data ?? [];
+  const [hotels, setHotels] = useState(hotelsJson.data ?? []);
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -154,6 +155,26 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     );
   }
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure?")) return;
+    if (!session?.user?.token) return;
+
+    try {
+      await deleteHotel(id, session.user.token);
+
+      setHotels((prev) =>
+        prev.filter((h) => (h.id || h._id) !== id)
+      );
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete hotel."
+      );
+    }
+  };
+
   return (
     <section className="figma-page py-6 sm:py-8">
       <div className="figma-shell">
@@ -211,6 +232,8 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
                 province={hotel.province}
                 price={hotel.price}
                 imgSrc={hotel.imgSrc}
+                id={hotel.id || hotel._id}
+                onDelete={handleDelete}
               />
             ))}
           </div>
