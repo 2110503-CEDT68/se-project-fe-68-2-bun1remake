@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"; 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { deleteHotel } from "@/libs/deleteHotel";
 
 export default function DeleteHotelPage() {
     const { data: session, status } = useSession();
@@ -33,6 +34,21 @@ export default function DeleteHotelPage() {
     if (status === "unauthenticated" || session?.user?.role !== "admin") {
         return <div className="min-h-screen bg-[#FDF6EF]" />; 
     }
+
+    const handleDelete = async (id: string) => {
+        if (!session?.user?.token) return;
+
+        try {
+            await deleteHotel(id, session.user.token);
+        } catch (error) {
+            console.error(error);
+            alert(
+                error instanceof Error
+                ? error.message
+                : "Failed to delete hotel."
+            );
+        }
+    };
 
     return (
         <div className="flex min-h-screen flex-col items-center justify-start bg-[#FDF6EF] px-4 font-figma-copy pt-8">
@@ -86,7 +102,8 @@ export default function DeleteHotelPage() {
                         onClick={() => {
                             if (isMatch) {
                                 console.log("Deleting hotel ID:", hotelId);
-                                // logic ลบจริง
+                                if (hotelId != null)
+                                    handleDelete(hotelId)
                             }
                         }}
                     >
