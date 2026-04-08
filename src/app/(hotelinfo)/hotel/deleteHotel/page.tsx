@@ -102,8 +102,10 @@ export default function DeleteHotelPage() {
                         onClick={() => {
                             if (isMatch) {
                                 console.log("Deleting hotel ID:", hotelId);
-                                if (hotelId != null)
+                                if (hotelId != null) {
                                     handleDelete(hotelId)
+                                    router.back();
+                                }
                             }
                         }}
                     >
