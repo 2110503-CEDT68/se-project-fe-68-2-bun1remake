@@ -82,12 +82,20 @@ function IconTag({ active }: { active: boolean }) {
 
 export default function CreateHotelPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [tab, setTab] = useState<Tab>("image");
   const [form, setForm] = useState<CreateHotelPayload>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status !== "loading") {
+      if (!session || session.user?.role !== "admin") {
+        router.push("/hotel");
+      }
+    }
+  }, [session, status, router]);
 
   useEffect(() => {
     if (uploadedUrl) {
@@ -97,6 +105,14 @@ export default function CreateHotelPage() {
       }));
     }
   }, [uploadedUrl]);
+
+  if (status === "loading") {
+    return <div className="min-h-screen bg-[#FDF6EF]" />;
+  }
+
+  if (status === "unauthenticated" || session?.user?.role !== "admin") {
+    return <div className="min-h-screen bg-[#FDF6EF]" />;
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

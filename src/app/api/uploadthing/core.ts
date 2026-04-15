@@ -1,9 +1,20 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-// server session 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+
 const f = createUploadthing();
-// !! need to change this
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
+
+const auth = async (req: Request) => {
+  const session = await getServerSession(authOptions);
+
+  // Only admin can upload
+  if (!session?.user || session.user.role !== "admin") {
+    return null;
+  }
+
+  return session.user;
+};
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
@@ -16,6 +27,7 @@ export const ourFileRouter = {
        */
       maxFileSize: "4MB",
       maxFileCount: 1,
+    
     },
   })
     // Set permissions and file types for this FileRoute
