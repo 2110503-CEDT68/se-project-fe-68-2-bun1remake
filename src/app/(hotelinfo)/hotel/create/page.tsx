@@ -2,9 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createHotel } from "@/libs/createHotel";
 import type { CreateHotelPayload } from "@/libs/createHotel";
+import Arrow from "@/components/Arrow";
+import {UploadButton} from "@/utils/uploadthing";
+import { createHotelRecache } from "@/libs/recache";
 
 type Tab = "image" | "info" | "tag";
 
@@ -84,6 +87,16 @@ export default function CreateHotelPage() {
   const [form, setForm] = useState<CreateHotelPayload>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (uploadedUrl) {
+      setForm((prev) => ({
+        ...prev,
+        imgSrc: uploadedUrl,
+      }));
+    }
+  }, [uploadedUrl]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -122,7 +135,7 @@ export default function CreateHotelPage() {
 
     setSubmitting(true);
     try {
-      await createHotel(form, session.user.token);
+      await createHotelRecache(form, session.user.token);
       router.push("/hotel");
       router.refresh();
     } catch (err) {
@@ -221,28 +234,28 @@ export default function CreateHotelPage() {
                     Centered horizontally in panel
                   */}
                   <div className="flex flex-col items-center gap-2 mt-[8%]">
-                    <label
-                      htmlFor="imgSrc"
-                      className="flex items-center gap-2 bg-[#b71422] hover:bg-[#99111f]
-                                 px-5 py-3 cursor-pointer transition-colors"
-                    >
-                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                        stroke="var(--figma-white)" strokeWidth="2"
-                        strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" y1="3" x2="12" y2="15" />
-                      </svg>
-                      <span className="font-figma-copy font-bold text-[var(--figma-white)]
-                                       tracking-[0.1em] text-[1.1rem] sm:text-[1.5rem] lg:text-[2rem]">
-                        Upload
-                      </span>
-                    </label>
+                    <span className="bg-[rgba(183,20,34,0.5)] hover:bg-[var(--figma-red)]
+                                     px-8 py-2 font-figma-nav font-bold
+                                     tracking-[0.12em] text-[var(--figma-white)]
+                                     transition-colors cursor-pointer inline-block"
+                          style={{ fontSize: "clamp(1rem, 2vw, 2.5rem)" }}>
+                      <UploadButton
+                        endpoint="imageUploader"
+                        onClientUploadComplete={(res) => {
+                          console.log("Files: ", res);
+                          setUploadedUrl(res?.[0]?.ufsUrl || "");
+                          alert("Upload Completed");
+                        }}
+                        onUploadError={(error: Error) => {
+                          alert(`ERROR! ${error.message}`);
+                        }}
+                      />
+                    </span>
 
                     {/* "Image (4MB)" — Figma: 24px mixed SC+Infant */}
                     <p className="font-figma-nav text-black tracking-[0.05em]
                                   text-[1.0rem] sm:text-[1.4rem] lg:text-[1.9rem]">
-                      Image (4MB)
+                      Preferably 616 x 275
                     </p>
                   </div>
                 </div>
@@ -318,9 +331,7 @@ export default function CreateHotelPage() {
                          transition-colors cursor-pointer justify-self-start"
               style={{ fontSize: "clamp(1rem, 2vw, 2.5rem)" }}
             >
-              <svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="16,4 8,12 16,20" />
-              </svg>
+              <Arrow direction="left"></Arrow>
               To Hotels
             </button>
 
