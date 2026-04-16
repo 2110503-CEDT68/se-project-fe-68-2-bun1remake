@@ -166,6 +166,7 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
         <div className="mt-5 space-y-3 border-t border-[rgba(171,25,46,0.12)] pt-5">
           <div className="flex items-center gap-3">
             <label className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</label>
+            {/* Star rating: click a star to set rating 1–5; filled red up to selected value */}
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((v) => (
                 <button
