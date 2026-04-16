@@ -166,15 +166,21 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
         <div className="mt-5 space-y-3 border-t border-[rgba(171,25,46,0.12)] pt-5">
           <div className="flex items-center gap-3">
             <label className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</label>
-            <select
-              value={newRating}
-              onChange={(e) => setNewRating(Number(e.target.value))}
-              className="figma-input max-w-[8rem]"
-            >
-              {[5, 4, 3, 2, 1, 0].map((v) => (
-                <option key={v} value={v}>{v} / 5</option>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setNewRating(v)}
+                  className={`text-[1.6rem] leading-none transition-colors ${
+                    v <= newRating ? "text-[var(--figma-red)]" : "text-[rgba(171,25,46,0.2)]"
+                  }`}
+                  aria-label={`Rate ${v} star${v > 1 ? "s" : ""}`}
+                >
+                  ★
+                </button>
               ))}
-            </select>
+            </div>
           </div>
           <textarea
             value={newComment}
