@@ -250,7 +250,7 @@ function ReviewInput({ value, onChange, onClear }: ReviewInputProps) {
         {/* Placeholder overlay */}
         {empty && (
           <span className="pointer-events-none absolute left-4 top-4 font-serif text-[1.05rem] italic tracking-wide text-[var(--figma-ink-soft)] select-none">
-            ADD YOUR COMMENT HERE
+            Add Your Comment Here
           </span>
         )}
         <div
@@ -475,9 +475,21 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
             <button
               type="button"
               onClick={() => setShowForm((v) => !v)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--figma-red)] font-figma-nav text-[1.6rem] leading-none text-white"
+              className="flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--figma-red)] text-white"
+              aria-label={showForm ? "Close review form" : "Write a review"}
             >
-              {showForm ? "−" : "+"}
+              {showForm ? (
+                /* X icon — close form */
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7" stroke="white" strokeWidth="1.4" />
+                  <path d="M5 5l6 6M11 5l-6 6" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              ) : (
+                /* + icon — open form */
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3v10M3 8h10" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              )}
             </button>
           )}
         </div>
@@ -520,9 +532,9 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
               type="button"
               onClick={() => void handleSubmit()}
               disabled={isSubmitting}
-              className="figma-button px-6 py-2 font-figma-nav text-[1.2rem]"
+              className="figma-button w-full py-3 font-figma-copy text-[1.3rem]"
             >
-              {isSubmitting ? "SUBMITTING…" : "SUBMIT"}
+              {isSubmitting ? "Submitting Review..." : "Submit Review"}
             </button>
           </div>
         )}
