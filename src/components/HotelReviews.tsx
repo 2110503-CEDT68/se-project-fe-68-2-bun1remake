@@ -71,13 +71,17 @@ function escapeHtml(s: string): string {
 function renderMarkdown(raw: string): string {
   const safe = escapeHtml(raw);
   return safe
-    // bold must come before italic to avoid partial matches
     .replace(/\*\*([\s\S]*?)\*\*/g, "<strong>$1</strong>")
     .replace(/__([\s\S]*?)__/g, "<u>$1</u>")
     .replace(/~~([\s\S]*?)~~/g, "<del>$1</del>")
     .replace(/_([\s\S]*?)_/g, "<em>$1</em>")
-    // newlines → <br>
     .replace(/\n/g, "<br />");
+}
+
+// New reviews come in as HTML (from contenteditable); old ones may be markdown.
+function renderCommentHtml(raw: string): string {
+  if (/<[a-zA-Z]/.test(raw)) return raw; // already HTML — render as-is
+  return renderMarkdown(raw);             // legacy markdown — convert first
 }
 
 function relativeTime(dateStr: string): string {
@@ -167,7 +171,7 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: ReviewCardProps) {
       <p
         ref={textRef}
         className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]"
-        dangerouslySetInnerHTML={{ __html: renderMarkdown(getCommentText(c)) }}
+        dangerouslySetInnerHTML={{ __html: renderCommentHtml(getCommentText(c)) }}
       />
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-3">
@@ -190,73 +194,76 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: ReviewCardProps) {
   );
 }
 
-/* ─── ReviewInput ──────────────────────────────────────────────── */
+/* ─── ReviewInput (contenteditable — live formatting) ─────────── */
 
 interface ReviewInputProps {
   value: string;
   onChange: (v: string) => void;
+  onClear: () => void; // called after submit so the div resets
 }
 
-function ReviewInput({ value, onChange }: ReviewInputProps) {
-  const taRef = useRef<HTMLTextAreaElement>(null);
-  // Store selection whenever the user moves cursor / selects text
-  const selRef = useRef({ start: 0, end: 0 });
+function ReviewInput({ value, onChange, onClear }: ReviewInputProps) {
+  const divRef = useRef<HTMLDivElement>(null);
+  // Track whether the div is empty so we can show/hide placeholder
+  const [empty, setEmpty] = useState(true);
 
-  function saveSelection() {
-    const ta = taRef.current;
-    if (ta) {
-      selRef.current = { start: ta.selectionStart, end: ta.selectionEnd };
+  // When parent resets value to "" (after submit), clear the div
+  useEffect(() => {
+    if (value === "" && divRef.current && divRef.current.innerHTML !== "") {
+      divRef.current.innerHTML = "";
+      setEmpty(true);
     }
+  }, [value]);
+
+  function handleInput() {
+    const div = divRef.current;
+    if (!div) return;
+    const html = div.innerHTML;
+    // Treat a div containing only a <br> as empty (browser default)
+    const isEmpty = html === "" || html === "<br>";
+    setEmpty(isEmpty);
+    onChange(isEmpty ? "" : html);
   }
 
-  function wrapSelection(open: string, close: string) {
-    const ta = taRef.current;
-    if (!ta) return;
-    const { start, end } = selRef.current;
-    const selected = value.slice(start, end);
-    const next = value.slice(0, start) + open + selected + close + value.slice(end);
-    onChange(next);
-    // Restore cursor/selection after React re-renders
-    const newStart = start + open.length;
-    const newEnd = end + open.length;
-    requestAnimationFrame(() => {
-      ta.focus();
-      ta.setSelectionRange(newStart, newEnd);
-      selRef.current = { start: newStart, end: newEnd };
-    });
+  function applyFormat(command: string) {
+    // execCommand works on the current selection inside the contenteditable
+    document.execCommand(command, false);
+    divRef.current?.focus();
+    handleInput();
   }
 
-  const fmtButtons: { label: string; open: string; close: string; btnClass: string }[] = [
-    { label: "B", open: "**", close: "**", btnClass: "font-bold" },
-    { label: "I", open: "_", close: "_", btnClass: "italic" },
-    { label: "U", open: "__", close: "__", btnClass: "underline" },
-    { label: "S", open: "~~", close: "~~", btnClass: "line-through" },
+  const fmtButtons: { label: string; cmd: string; btnClass: string }[] = [
+    { label: "B", cmd: "bold",          btnClass: "font-bold" },
+    { label: "I", cmd: "italic",        btnClass: "italic" },
+    { label: "U", cmd: "underline",     btnClass: "underline" },
+    { label: "S", cmd: "strikeThrough", btnClass: "line-through" },
   ];
 
   return (
     <div className="border border-[rgba(171,25,46,0.15)] bg-[rgba(255,245,244,0.6)]">
-      <textarea
-        ref={taRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onSelect={saveSelection}
-        onKeyUp={saveSelection}
-        onClick={saveSelection}
-        placeholder="ADD YOUR COMMENT HERE"
-        rows={4}
-        className="w-full resize-none bg-transparent px-4 pt-4 pb-2 font-serif text-[1.05rem] leading-relaxed text-[var(--figma-ink)] placeholder:italic placeholder:tracking-wide placeholder:text-[var(--figma-ink-soft)] focus:outline-none"
-      />
+      <div className="relative min-h-[6.5rem] px-4 pt-4 pb-2">
+        {/* Placeholder overlay */}
+        {empty && (
+          <span className="pointer-events-none absolute left-4 top-4 font-serif text-[1.05rem] italic tracking-wide text-[var(--figma-ink-soft)] select-none">
+            ADD YOUR COMMENT HERE
+          </span>
+        )}
+        <div
+          ref={divRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          className="relative min-h-[5rem] font-serif text-[1.05rem] leading-relaxed text-[var(--figma-ink)] focus:outline-none"
+        />
+      </div>
       <div className="mx-4 border-t border-[rgba(171,25,46,0.12)]" />
       <div className="flex gap-2 px-4 py-2">
         {fmtButtons.map((btn) => (
           <button
             key={btn.label}
             type="button"
-            onMouseDown={(e) => {
-              // Prevent textarea from losing focus so selection is preserved
-              e.preventDefault();
-            }}
-            onClick={() => wrapSelection(btn.open, btn.close)}
+            onMouseDown={(e) => e.preventDefault()} // keep focus in contenteditable
+            onClick={() => applyFormat(btn.cmd)}
             className={`flex h-7 w-7 items-center justify-center border border-[rgba(171,25,46,0.2)] font-figma-copy text-[0.9rem] text-[var(--figma-ink)] transition-colors hover:bg-[rgba(171,25,46,0.07)] ${btn.btnClass}`}
             aria-label={btn.label}
           >
@@ -319,7 +326,7 @@ function FullReviewModal({ c, canDel, onDelete, onClose }: FullReviewModalProps)
         </div>
         <p
           className="mt-4 font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]"
-          dangerouslySetInnerHTML={{ __html: renderMarkdown(getCommentText(c)) }}
+          dangerouslySetInnerHTML={{ __html: renderCommentHtml(getCommentText(c)) }}
         />
         <p className="mt-4 font-figma-copy text-[0.9rem] text-[var(--figma-ink-soft)]">
           {relativeTime(getDateField(c))}
@@ -381,7 +388,9 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
 
   const handleSubmit = async () => {
     if (!token) return;
-    if (!newComment.trim()) {
+    // Strip HTML tags to get plain text for the empty check
+    const plainText = newComment.replace(/<[^>]+>/g, "").trim();
+    if (!plainText) {
       showNotice({ type: "error", message: "Please write a comment." });
       return;
     }
@@ -493,8 +502,12 @@ export default function HotelReviews({ hotelId }: HotelReviewsProps) {
               </div>
             </div>
 
-            {/* Styled textarea */}
-            <ReviewInput value={newComment} onChange={setNewComment} />
+            {/* Rich text input */}
+            <ReviewInput
+              value={newComment}
+              onChange={setNewComment}
+              onClear={() => setNewComment("")}
+            />
 
             <DismissibleNotice notice={notice} onClose={dismissNotice} />
 
