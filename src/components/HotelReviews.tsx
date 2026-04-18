@@ -49,6 +49,16 @@ function getDateField(c: CommentItem): string {
   );
 }
 
+// Backend schema uses 'text' field; frontend sends 'comment'. Read both.
+function getCommentText(c: CommentItem): string {
+  const raw = c as unknown as Record<string, unknown>;
+  return (
+    (typeof c.comment === "string" ? c.comment : undefined) ||
+    (typeof raw.text === "string" ? raw.text : undefined) ||
+    ""
+  );
+}
+
 function relativeTime(dateStr: string): string {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -107,7 +117,7 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: ReviewCardProps) {
     if (el) {
       setClamped(el.scrollHeight > el.clientHeight + 2);
     }
-  }, [c.comment]);
+  }, [c]);
 
   return (
     <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
@@ -137,7 +147,7 @@ function ReviewCard({ c, canDel, onDelete, onExpand }: ReviewCardProps) {
         ref={textRef}
         className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]"
       >
-        {c.comment || ""}
+        {getCommentText(c)}
       </p>
 
       <div className="mt-auto flex items-center justify-between gap-2 pt-3">
@@ -169,27 +179,38 @@ interface ReviewInputProps {
 
 function ReviewInput({ value, onChange }: ReviewInputProps) {
   const taRef = useRef<HTMLTextAreaElement>(null);
+  // Store selection whenever the user moves cursor / selects text
+  const selRef = useRef({ start: 0, end: 0 });
+
+  function saveSelection() {
+    const ta = taRef.current;
+    if (ta) {
+      selRef.current = { start: ta.selectionStart, end: ta.selectionEnd };
+    }
+  }
 
   function wrapSelection(open: string, close: string) {
     const ta = taRef.current;
     if (!ta) return;
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
+    const { start, end } = selRef.current;
     const selected = value.slice(start, end);
-    const next =
-      value.slice(0, start) + open + selected + close + value.slice(end);
+    const next = value.slice(0, start) + open + selected + close + value.slice(end);
     onChange(next);
+    // Restore cursor/selection after React re-renders
+    const newStart = start + open.length;
+    const newEnd = end + open.length;
     requestAnimationFrame(() => {
       ta.focus();
-      ta.setSelectionRange(start + open.length, end + open.length);
+      ta.setSelectionRange(newStart, newEnd);
+      selRef.current = { start: newStart, end: newEnd };
     });
   }
 
-  const fmtButtons: { label: string; open: string; close: string; style?: string }[] = [
-    { label: "B", open: "**", close: "**", style: "font-bold" },
-    { label: "I", open: "_", close: "_", style: "italic" },
-    { label: "U", open: "__", close: "__", style: "underline" },
-    { label: "S", open: "~~", close: "~~", style: "line-through" },
+  const fmtButtons: { label: string; open: string; close: string; btnClass: string }[] = [
+    { label: "B", open: "**", close: "**", btnClass: "font-bold" },
+    { label: "I", open: "_", close: "_", btnClass: "italic" },
+    { label: "U", open: "__", close: "__", btnClass: "underline" },
+    { label: "S", open: "~~", close: "~~", btnClass: "line-through" },
   ];
 
   return (
@@ -198,9 +219,12 @@ function ReviewInput({ value, onChange }: ReviewInputProps) {
         ref={taRef}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onSelect={saveSelection}
+        onKeyUp={saveSelection}
+        onClick={saveSelection}
         placeholder="ADD YOUR COMMENT HERE"
         rows={4}
-        className="w-full resize-none bg-transparent px-4 pt-4 pb-2 font-serif text-[1.05rem] italic leading-relaxed text-[var(--figma-ink)] placeholder:italic placeholder:tracking-wide placeholder:text-[var(--figma-ink-soft)] focus:outline-none"
+        className="w-full resize-none bg-transparent px-4 pt-4 pb-2 font-serif text-[1.05rem] leading-relaxed text-[var(--figma-ink)] placeholder:italic placeholder:tracking-wide placeholder:text-[var(--figma-ink-soft)] focus:outline-none"
       />
       <div className="mx-4 border-t border-[rgba(171,25,46,0.12)]" />
       <div className="flex gap-2 px-4 py-2">
@@ -209,10 +233,11 @@ function ReviewInput({ value, onChange }: ReviewInputProps) {
             key={btn.label}
             type="button"
             onMouseDown={(e) => {
+              // Prevent textarea from losing focus so selection is preserved
               e.preventDefault();
-              wrapSelection(btn.open, btn.close);
             }}
-            className={`flex h-7 w-7 items-center justify-center border border-[rgba(171,25,46,0.2)] font-figma-copy text-[0.9rem] text-[var(--figma-ink)] transition-colors hover:bg-[rgba(171,25,46,0.07)] ${btn.style || ""}`}
+            onClick={() => wrapSelection(btn.open, btn.close)}
+            className={`flex h-7 w-7 items-center justify-center border border-[rgba(171,25,46,0.2)] font-figma-copy text-[0.9rem] text-[var(--figma-ink)] transition-colors hover:bg-[rgba(171,25,46,0.07)] ${btn.btnClass}`}
             aria-label={btn.label}
           >
             {btn.label}
@@ -273,7 +298,7 @@ function FullReviewModal({ c, canDel, onDelete, onClose }: FullReviewModalProps)
           </div>
         </div>
         <p className="mt-4 font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
-          {c.comment || ""}
+          {getCommentText(c)}
         </p>
         <p className="mt-4 font-figma-copy text-[0.9rem] text-[var(--figma-ink-soft)]">
           {relativeTime(getDateField(c))}
