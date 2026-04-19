@@ -80,6 +80,20 @@ const filteredHotels = useMemo(() => {
 
     if (!matchesSearch) return false;
 
+    if (selectedFilters.rating) {
+       const hotelRating = (hotel as any).rating || (hotel as any).review;
+       if (String(hotelRating) !== selectedFilters.rating) return false;
+    }
+
+    if (selectedFilters.priceRange) {
+      const p = hotel.price;
+      //Change price range here
+      if (selectedFilters.priceRange === "$" && p > 1000) return false;
+      if (selectedFilters.priceRange === "$$" && (p <= 1000 || p > 3000)) return false;
+      if (selectedFilters.priceRange === "$$$" && (p <= 3000 || p > 6000)) return false;
+      if (selectedFilters.priceRange === "$$$+" && p <= 6000) return false;
+    }
+
     const specs = hotel.specializations;
 
     // 2. Facility Tags 
