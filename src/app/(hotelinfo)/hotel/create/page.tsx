@@ -114,6 +114,7 @@ export default function CreateHotelPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [tagSearch, setTagSearch] = useState("");
+  const [openCategory, setOpenCategory] = useState<TagCategory>("location");
 
   const selectedSpecializations = form.specializations ?? createEmptySpecializations();
   const selectedTagCount =
@@ -372,85 +373,117 @@ export default function CreateHotelPage() {
 
               {/* ── Tag / Pricing tab ── */}
               {tab === "tag" && (
-                <div className="space-y-6">
-                  <div>
-                    <input
-                      type="text"
-                      value={tagSearch}
-                      onChange={(event) => setTagSearch(event.target.value)}
-                      placeholder="Search tags"
-                      className="figma-input w-full"
-                    />
+                <div className="mx-auto flex max-w-[52rem] flex-col gap-5">
+                  <div className="border border-[#f3aaaa] bg-[rgba(254,186,207,0.15)] px-4 py-4 shadow-[inset_-4px_-4px_4px_rgba(255,255,255,0.5),inset_4px_4px_4px_rgba(133,133,133,0.25)] sm:px-6">
+                    <div className="px-1">
+                      <input
+                        type="text"
+                        value={tagSearch}
+                        onChange={(event) => setTagSearch(event.target.value)}
+                        placeholder="Search for Tags"
+                        className="w-full border-b-2 border-[#f3aaaa] bg-transparent px-1 pb-2 font-figma-nav text-[1.45rem] tracking-[0.04em] text-black placeholder:text-[#f3aaaa] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="mt-4 max-h-[18rem] overflow-y-auto pr-1">
+                      {(Object.keys(TAG_OPTIONS) as TagCategory[]).map((category) => {
+                        const visibleOptions = TAG_OPTIONS[category].filter((value) =>
+                          value.toLowerCase().includes(normalizedTagSearch),
+                        );
+                        const isOpen = openCategory === category;
+                        const categoryCount = selectedSpecializations[category].length;
+
+                        return (
+                          <section
+                            key={category}
+                            className="mb-3 border-2 border-[#f3aaaa] bg-transparent last:mb-0"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => setOpenCategory(category)}
+                              className="flex w-full items-center justify-between px-4 py-3 text-left"
+                            >
+                              <div className="flex items-center">
+                                <span className="font-figma-nav text-[1.35rem] tracking-[0.04em] text-[#ab192e]">
+                                  {TAG_CATEGORY_LABELS[category]}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="font-figma-copy text-[0.95rem] text-[#ab192e]">
+                                  {categoryCount} selected
+                                </span>
+                                <span className="font-figma-nav text-[1.3rem] text-[#ab192e]">
+                                  {isOpen ? "▾" : "▸"}
+                                </span>
+                              </div>
+                            </button>
+
+                            {isOpen && (
+                              <div className="border-t border-[#f3aaaa] px-4 py-3">
+                                {visibleOptions.length > 0 ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    {visibleOptions.map((value) => {
+                                      const selected = selectedSpecializations[category].includes(value);
+
+                                      return (
+                                        <button
+                                          key={`${category}-${value}`}
+                                          type="button"
+                                          onClick={() => toggleTag(category, value)}
+                                          className={`rounded-full px-3 py-[0.35rem] font-figma-nav text-[1.05rem] tracking-[0.03em] shadow-[0_4px_4px_rgba(0,0,0,0.2)] transition-colors ${
+                                            selected
+                                              ? "bg-[#ab192e] text-[#fbefdf]"
+                                              : "bg-[#fbefdf] text-black hover:bg-[rgba(255,124,124,0.35)]"
+                                          }`}
+                                        >
+                                          {formatTagLabel(value)}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                                    No matching tags in this category.
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </section>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="border border-[rgba(171,25,46,0.2)] bg-[rgba(255,245,244,0.6)] px-4 py-4 sm:px-6">
-                    <p className="font-figma-nav text-[1.05rem] tracking-[0.08em] text-[var(--figma-red)]">
-                      {selectedTagCount} tag{selectedTagCount === 1 ? "" : "s"} selected
+                  <div>
+                    <p className="mb-2 flex items-center gap-2 font-figma-nav text-[1.18rem] tracking-[0.08em] text-[#ab192e]">
+                      <img src="/tick.svg" alt="Selected tags" className="h-5 w-5" />
+                      {selectedTagCount} TAG{selectedTagCount === 1 ? "" : "S"} SELECTED
                     </p>
 
-                    {selectedTagCount > 0 ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="border-[3px] border-[#ab192e] bg-transparent px-4 py-3 sm:px-5">
+                      {selectedTagCount > 0 ? (
+                        <div className="flex flex-wrap gap-2">
                         {(Object.keys(TAG_OPTIONS) as TagCategory[]).flatMap((category) =>
                           selectedSpecializations[category].map((value) => (
                             <button
                               key={`${category}:${value}`}
                               type="button"
                               onClick={() => toggleTag(category, value)}
-                              className="rounded-full bg-[rgba(255,124,124,0.35)] px-3 py-1 font-figma-copy text-[0.95rem] text-black transition-colors hover:bg-[rgba(255,124,124,0.55)]"
+                              className="rounded-full bg-[rgba(255,124,124,0.4)] px-3 py-[0.3rem] font-figma-nav text-[1rem] tracking-[0.02em] text-black shadow-[0_4px_4px_rgba(0,0,0,0.2)] transition-colors hover:bg-[rgba(255,124,124,0.55)]"
                             >
                               {formatTagLabel(value)}
-                              <span className="ml-2 text-[var(--figma-red)]">x</span>
+                              <span className="ml-2 text-[#ab192e]">x</span>
                             </button>
                           )),
                         )}
-                      </div>
-                    ) : (
-                      <p className="mt-2 font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
-                        No tags selected yet.
-                      </p>
-                    )}
+                        </div>
+                      ) : (
+                        <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                          No tags selected yet.
+                        </p>
+                      )}
+                    </div>
                   </div>
-
-                  {(Object.keys(TAG_OPTIONS) as TagCategory[]).map((category) => {
-                    const visibleOptions = TAG_OPTIONS[category].filter((value) =>
-                      value.toLowerCase().includes(normalizedTagSearch),
-                    );
-
-                    return (
-                      <section key={category} className="space-y-3">
-                        <h3 className="font-figma-nav text-[1.15rem] tracking-[0.08em] text-[var(--figma-red)]">
-                          {TAG_CATEGORY_LABELS[category]}
-                        </h3>
-
-                        {visibleOptions.length > 0 ? (
-                          <div className="flex flex-wrap gap-3">
-                            {visibleOptions.map((value) => {
-                              const selected = selectedSpecializations[category].includes(value);
-
-                              return (
-                                <button
-                                  key={`${category}-${value}`}
-                                  type="button"
-                                  onClick={() => toggleTag(category, value)}
-                                  className={`rounded-full px-3 py-1 font-figma-copy text-[1rem] transition-colors ${
-                                    selected
-                                      ? "bg-[var(--figma-red)] text-[var(--figma-white)]"
-                                      : "bg-[rgba(251,239,223,0.9)] text-black hover:bg-[rgba(255,124,124,0.3)]"
-                                  }`}
-                                >
-                                  {formatTagLabel(value)}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <p className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
-                            No matching tags in this category.
-                          </p>
-                        )}
-                      </section>
-                    );
-                  })}
                 </div>
               )}
 
