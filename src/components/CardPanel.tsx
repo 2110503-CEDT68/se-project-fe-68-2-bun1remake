@@ -31,7 +31,7 @@ function isEditableTarget(target: EventTarget | null) {
 
 export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
   const { data: session } = useSession();
-  const isAdmin = session?.user?.role === "admin"; 
+  const isAdmin = session?.user?.role === "admin";
   const hotels = hotelsJson.data ?? [];
   const pathname = usePathname();
   const router = useRouter();
@@ -60,7 +60,10 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
     );
   }, [hotels, searchTerm]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredHotels.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredHotels.length / ITEMS_PER_PAGE),
+  );
 
   const visibleHotels = useMemo(() => {
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -150,13 +153,11 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
 
   if (hotels.length === 0) {
     return (
-      <div className="py-16 text-center font-figma-copy text-[1.6rem] text-[var(--figma-ink-soft)]">
+      <div className="py-16 text-center font-figma-copy text-[1.6rem] text-[#FFAAAA]">
         No hotels available at the moment.
       </div>
     );
   }
-
-  
 
   return (
     <section className="figma-page py-6 sm:py-8">
@@ -182,30 +183,34 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
 
         <div className="mt-6">
           <div className="flex items-center justify-between gap-4">
-            
             <div className="flex items-center gap-4">
-              <label className="font-figma-nav text-[1rem] tracking-[0.08em] text-[var(--figma-red)]">
+              <label className="font-figma-nav text-[1rem] tracking-[0.08em] text-[#FFAAAA]">
                 FIND A HOTEL
               </label>
-              <p className="font-figma-copy text-[1.15rem] text-[var(--figma-ink-soft)]">
-                {filteredHotels.length} hotel{filteredHotels.length === 1 ? "" : "s"} available
+              <p className="font-figma-copy text-[1.15rem] text-[#FFAAAA]">
+                {filteredHotels.length} hotel
+                {filteredHotels.length === 1 ? "" : "s"} available
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              
               {isAdmin && (
                 <Link href="/hotel/create">
                   <button className="flex items-center gap-2 bg-red-700 px-6 py-2 text-white shadow hover:bg-red-800 transition-colors cursor-pointer">
-                    <img src="/addhotel.svg" alt="Add icon" className="w-5 h-5" />
-                    <span className="font-figma-copy text-[1.15rem] tracking-wide">Add</span>
+                    <img
+                      src="/addhotel.svg"
+                      alt="Add icon"
+                      className="w-5 h-5"
+                    />
+                    <span className="font-figma-copy text-[1.15rem] tracking-wide">
+                      Add
+                    </span>
                   </button>
                 </Link>
               )}
             </div>
-
           </div>
-          
+
           <input
             type="text"
             value={searchTerm}
@@ -241,7 +246,7 @@ export default function CardPanel({ hotelsJson }: { hotelsJson: HotelJson }) {
             <p className="font-figma-nav text-[1.35rem] tracking-[0.08em] text-[var(--figma-red)]">
               NO HOTELS MATCH THIS FILTER
             </p>
-            <p className="mt-2 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
+            <p className="mt-2 font-figma-copy text-[1.3rem] text-[#FFAAAA]">
               Try a different hotel name, city, or address keyword.
             </p>
           </div>
