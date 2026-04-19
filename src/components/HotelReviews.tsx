@@ -9,22 +9,14 @@ import DismissibleNotice from "@/components/DismissibleNotice";
 
 const PAGE_SIZE = 6;
 
-function userIdOf(c: CommentItem): string {
-  if (typeof c.userId === "string") return c.userId;
-  if (c.userId && typeof c.userId === "object") return (c.userId as { _id?: string })._id || "";
-  const u = (c as unknown as { user?: { _id?: string } }).user;
-  return u?._id || "";
+type UserLike = { _id?: string; name?: string };
+function userObj(c: CommentItem): UserLike | null {
+  return (typeof c.userId === "object" ? c.userId : (c as unknown as { user?: unknown }).user) as UserLike | null;
 }
-function nameOf(c: CommentItem): string {
-  const obj = (typeof c.userId === "object" ? c.userId : (c as unknown as { user?: unknown }).user) as { name?: string } | null;
-  return obj?.name || "Guest";
-}
-function textOf(c: CommentItem): string {
-  return c.comment || (c as unknown as { text?: string }).text || "";
-}
-function dateOf(c: CommentItem): string {
-  return c.commentDate || (c as unknown as { createdAt?: string }).createdAt || "";
-}
+const userIdOf = (c: CommentItem) => typeof c.userId === "string" ? c.userId : (userObj(c)?._id || "");
+const nameOf = (c: CommentItem) => userObj(c)?.name || "Guest";
+const textOf = (c: CommentItem) => c.comment || (c as unknown as { text?: string }).text || "";
+const dateOf = (c: CommentItem) => c.commentDate || (c as unknown as { createdAt?: string }).createdAt || "";
 function relTime(d: string): string {
   if (!d) return "";
   const diff = Date.now() - new Date(d).getTime();
@@ -67,9 +59,7 @@ function ReviewCard({ c, canDel, onDelete }: {
         )}
       </div>
       <p className="mt-2 line-clamp-3 font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] whitespace-pre-wrap">{textOf(c)}</p>
-      <div className="mt-auto flex items-center justify-end gap-2 pt-3">
-        <span className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</span>
-      </div>
+      <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
     </article>
   );
 }
