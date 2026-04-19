@@ -128,7 +128,7 @@ export default function UpdateHotelPage() {
         router.push("/hotel");
       }
     }
-  }, [session, status, router]);
+  }, [session, status,  router]);
 
   useEffect(() => {
     if (!hid) return;
