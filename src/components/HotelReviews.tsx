@@ -28,19 +28,22 @@ function dateOf(c: CommentItem): string {
 function relTime(d: string): string {
   if (!d) return "";
   const diff = Date.now() - new Date(d).getTime();
-  if (isNaN(diff)) return "";
-  const days = Math.floor(diff / 86400000);
+  if (isNaN(diff) || diff < 0) return "";
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);
-  if (years > 0) {
-    const m = months - years * 12;
-    return m > 0 ? `${years}y and ${m}mo ago` : `${years}y ago`;
-  }
-  if (months > 0) {
-    const rd = days - months * 30;
-    return rd > 0 ? `${months}mo and ${rd}d ago` : `${months}mo ago`;
-  }
-  return days > 0 ? `${days}d ago` : "just now";
+  const p = (n: number, u: string) => `${n} ${u}${n > 1 ? "s" : ""}`;
+  const two = (a: number, ua: string, b: number, ub: string) =>
+    b > 0 ? `${p(a, ua)} and ${p(b, ub)} ago` : `${p(a, ua)} ago`;
+  if (years > 0) return two(years, "year", months - years * 12, "month");
+  if (months > 0) return two(months, "month", days - months * 30, "day");
+  if (days > 0) return two(days, "day", hours - days * 24, "hour");
+  if (hours > 0) return two(hours, "hour", minutes - hours * 60, "minute");
+  if (minutes > 0) return two(minutes, "minute", seconds - minutes * 60, "second");
+  return "just now";
 }
 function stars(r: number): string {
   const n = Math.max(0, Math.min(5, Math.round(Number(r) || 0)));
