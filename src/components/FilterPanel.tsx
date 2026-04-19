@@ -155,6 +155,7 @@ export default function FilterPanel({ isOpen, selectedFilters, onToggle }: Filte
         </section>
         
         <section className="space-y-6">
+          {/** 
           <h3 className="font-['Cormorant_SC'] text-[32px] font-bold leading-[39px] tracking-[0.05em] text-[#AB192E] uppercase">
             Accommodation Type
           </h3>
@@ -168,7 +169,7 @@ export default function FilterPanel({ isOpen, selectedFilters, onToggle }: Filte
                 onClick={() => onToggle("accommodationType", type)}
               />
             ))}
-          </div>
+          </div> */}
         </section>
 
         <section className="space-y-6">
