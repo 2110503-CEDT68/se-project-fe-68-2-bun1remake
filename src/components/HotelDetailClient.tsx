@@ -44,7 +44,9 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
   const [toDate, setToDate] = useState(urlDateRange.checkOut);
   const [guestsAdult, setGuestsAdult] = useState(urlDateRange.guestsAdult);
   const [guestsChild, setGuestsChild] = useState(urlDateRange.guestsChild);
-  const [bookingState, setBookingState] = useState<"idle" | "arming" | "submitting">("idle");
+  const [bookingState, setBookingState] = useState<
+    "idle" | "arming" | "submitting"
+  >("idle");
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
   const bookingTimerRef = useRef<number | null>(null);
   const hotelId = hotel.id || hotel._id;
@@ -58,15 +60,12 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
         ? "Sending to backend..."
         : "";
   const bookingSearchParams = useMemo(() => {
-    const nextParams = createDateRangeSearchParams(
-      new URLSearchParams(),
-      {
-        checkIn: fromDate,
-        checkOut: toDate,
-        guestsAdult,
-        guestsChild,
-      },
-    );
+    const nextParams = createDateRangeSearchParams(new URLSearchParams(), {
+      checkIn: fromDate,
+      checkOut: toDate,
+      guestsAdult,
+      guestsChild,
+    });
     nextParams.set("hotelId", hotelId);
     nextParams.set("venue", hotel.name);
     return nextParams;
@@ -213,6 +212,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
 
         <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
           <div className="grid gap-8 xl:grid-cols-[1.4fr_0.86fr]">
+            {/* LEFT COLUMN: Hotel Content */}
             <div>
               <div className="aspect-[896/400] overflow-hidden bg-[#efe3d8]">
                 {hotel.imgSrc ? (
@@ -229,22 +229,23 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                 )}
               </div>
 
-              <h1 className="mt-6 font-figma-copy text-[2.7rem] leading-none text-[var(--figma-ink)] sm:text-[3.75rem]">
+              <h1 className="mt-6 font-figma-copy text-[2.7rem] leading-none text-[#FFAAAA] sm:text-[3.75rem]">
                 {hotel.name}
               </h1>
 
-              <p className="mt-4 max-w-[56rem] font-figma-copy text-[1.25rem] leading-[1.45] text-[var(--figma-ink-soft)] sm:text-[1.55rem]">
+              <p className="mt-4 max-w-[56rem] font-figma-copy text-[1.25rem] leading-[1.45] text-[#FFAAAA] sm:text-[1.55rem]">
                 {hotel.description}
               </p>
 
-              <p className="mt-5 flex items-start gap-3 font-figma-copy text-[1.2rem] text-[var(--figma-ink)] sm:text-[1.45rem]">
+              <p className="mt-5 flex items-start gap-3 font-figma-copy text-[1.2rem] text-[#FFAAAA] sm:text-[1.45rem]">
                 <span className="pt-1 text-[var(--figma-red)]">+</span>
                 <span>{hotel.address}</span>
               </p>
             </div>
 
+            {/* RIGHT COLUMN: Pricing & Booking Logic */}
             <div className="flex flex-col justify-between gap-8">
-              <div className="space-y-5 font-figma-copy text-[1.4rem] text-[var(--figma-ink)] sm:text-[1.7rem]">
+              <div className="space-y-5 font-figma-copy text-[1.4rem] text-[#FFAAAA] sm:text-[1.7rem]">
                 <div className="flex items-center justify-between gap-6">
                   <span>Price :</span>
                   <span>${hotel.price.toLocaleString()}</span>
@@ -260,6 +261,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
               </div>
 
               <div className="space-y-4">
+                {/* Booking State UI: Shows status text and a timed progress bar during "arming" phase */}
                 <div className="space-y-3">
                   <div className="flex min-h-[1.75rem] items-center justify-center">
                     {bookingStatusLabel ? (
@@ -293,6 +295,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                   </div>
                 </div>
 
+                {/* Action Button: Dynamic text based on current booking state */}
                 <button
                   type="button"
                   onClick={handleBook}
@@ -306,6 +309,7 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                       : "BOOKING"}
                 </button>
 
+                {/* Footer Actions: Navigation and Admin Tools */}
                 <div className="flex items-center justify-between gap-3">
                   <Link
                     href={buildDateRangeHref("/hotel", {
@@ -322,11 +326,16 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                     <span>Go Back</span>
                   </Link>
 
+                  {/* Admin Controls: Edit/Delete visible only to authorized users */}
                   {isAdmin ? (
                     <div className="flex items-center gap-2">
                       <Link href={`/hotel/${hotelId}/update`}>
                         <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
-                          <img src="/edit.svg" alt="Edit icon" className="h-[18px] w-[18px]" />
+                          <img
+                            src="/edit.svg"
+                            alt="Edit icon"
+                            className="h-[18px] w-[18px]"
+                          />
                         </button>
                       </Link>
 
@@ -334,13 +343,18 @@ export default function HotelDetailClient({ hotel }: HotelDetailClientProps) {
                         href={`/hotel/deleteHotel?id=${hotelId}&name=${encodeURIComponent(hotel.name)}`}
                       >
                         <button className="flex h-10 w-10 items-center justify-center bg-red-700 text-white shadow transition-colors hover:bg-red-800 cursor-pointer">
-                          <img src="/delete.svg" alt="Delete icon" className="h-[18px] w-[18px]" />
+                          <img
+                            src="/delete.svg"
+                            alt="Delete icon"
+                            className="h-[18px] w-[18px]"
+                          />
                         </button>
                       </Link>
                     </div>
                   ) : null}
                 </div>
 
+                {/* Global Notifications (Errors/Success) */}
                 <DismissibleNotice notice={notice} onClose={dismissNotice} />
               </div>
             </div>
