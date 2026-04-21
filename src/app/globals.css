@@ -277,6 +277,18 @@ button:active {
   padding: 0.95rem 1.5rem;
 }
 
+.figma-toolbar-var {
+  display: inline-flex;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  border: 1px solid rgba(183, 20, 34, 0.08);
+  background: rgba(255, 245, 244, 0.4);
+  padding: 0.95rem 1.5rem;
+}
+
 .figma-toolbar-field {
   display: flex;
   flex-direction: column;
@@ -284,7 +296,6 @@ button:active {
 }
 
 .figma-toolbar-guests {
-  margin-left: auto;
   display: flex;
   align-items: flex-end;
   gap: 1rem;
