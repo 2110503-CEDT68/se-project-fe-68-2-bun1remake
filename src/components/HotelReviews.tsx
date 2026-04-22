@@ -15,10 +15,10 @@ const PAGE_SIZE = 6;
 
 type UserLike = { _id?: string; name?: string };
 function userObj(c: CommentItem): UserLike | null {
-  return (typeof c.user === "object" ? c.user : null) as UserLike | null;
+  return (c.user && typeof c.user === "object" ? c.user : null) as UserLike | null;
 }
 const userIdOf = (c: CommentItem) => typeof c.user === "string" ? c.user : (userObj(c)?._id || "");
-const nameOf = (c: CommentItem) => userObj(c)?.name || "Guest";
+const nameOf = (c: CommentItem) => userObj(c)?.name || c.guestName || "Guest";
 const textOf = (c: CommentItem) => c.text || c.comment || "";
 const dateOf = (c: CommentItem) => c.createdAt || c.commentDate || "";
 function relTime(d: string): string {
@@ -245,6 +245,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
+  const [guestName, setGuestName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -269,7 +270,13 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
     return () => { ignore = true; };
   }, [hotelId]);
 
-  const canDel = (c: CommentItem) => role === "admin" || (role === "user" && !!uid && userIdOf(c) === uid);
+  // Guests (no token / no uid) can never delete.
+  // Logged-in users can delete only their own comments; admins can delete any.
+  const canDel = (c: CommentItem) =>
+    !!token && (
+      role === "admin" ||
+      (role === "user" && !!uid && !!userIdOf(c) && userIdOf(c) === uid)
+    );
 
   const syncTextFromEditor = () => {
     const editor = editorRef.current;
@@ -325,6 +332,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
     if (showForm && editorRef.current) {
       editorRef.current.innerHTML = "";
       setText("");
+      setGuestName("");
       setActiveFormats(emptyFormatState());
     }
     setShowForm((v) => !v);
@@ -332,19 +340,35 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const submit = async () => {
     const latestText = syncTextFromEditor();
-    if (!token) return;
     if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
     setSubmitting(true);
     try {
-      const r = await createComment(hotelId, token, { comment: latestText.trim(), rating });
+      const payload: { comment: string; rating: number; guestName?: string } = {
+        comment: latestText.trim(),
+        rating,
+      };
+      // For guests, attach the name they typed (fall back to "Guest")
+      if (!token) payload.guestName = guestName.trim() || "Guest";
+
+      const r = await createComment(hotelId, token || null, payload);
       if (r?.data) {
-        const updated = [r.data, ...comments];
+        // Enrich the returned comment with the display name immediately so the
+        // card shows the correct name without requiring a full page refresh.
+        const displayName = token
+          ? (session?.user?.name || "You")
+          : (guestName.trim() || "Guest");
+        const enriched = {
+          ...r.data,
+          user: token ? { _id: uid, name: displayName } : null,
+          guestName: token ? undefined : displayName,
+        };
+        const updated = [enriched, ...comments];
         setComments(updated);
         setAvg(recalcAvg(updated));
       }
       if (editorRef.current) editorRef.current.innerHTML = "";
       setActiveFormats(emptyFormatState());
-      setText(""); setRating(5); setShowForm(false);
+      setText(""); setGuestName(""); setRating(5); setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
       showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to submit." });
@@ -375,20 +399,34 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
             Reviews ({comments.length}){avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
           </h2>
-          {token && (
-            <button
-              type="button"
-              onClick={toggleForm}
-              className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
-              aria-label={showForm ? "Close" : "Write a review"}
-            >
-              {showForm ? "×" : "+"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={toggleForm}
+            className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+            aria-label={showForm ? "Close" : "Write a review"}
+          >
+            {showForm ? "×" : "+"}
+          </button>
         </div>
 
-        {showForm && token && (
+        {showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
+            {/* Guest name input — only shown to visitors without a session */}
+            {!token && (
+              <div className="flex flex-col gap-1">
+                <label className="font-figma-copy text-[1rem] text-[var(--figma-ink-soft)]">
+                  Your name <span className="text-[0.85rem]">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="Guest"
+                  maxLength={50}
+                  className="border border-[rgba(171,25,46,0.18)] bg-[rgba(255,245,244,0.6)] px-3 py-2 font-figma-copy text-[1rem] text-[var(--figma-ink)] placeholder:text-[rgba(250,170,170,0.95)] focus:outline-none"
+                />
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</span>
               <div className="flex gap-1">
