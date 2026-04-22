@@ -210,6 +210,10 @@ function renderReviewText(input: string) {
 function ReviewCard({ c, canDel, onDelete }: {
   c: CommentItem; canDel: boolean; onDelete: (id: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const raw = textOf(c);
+  const isLong = raw.split("\n").length > 3 || raw.length > 200;
+
   return (
     <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
       <div className="flex items-start justify-between gap-2">
@@ -223,10 +227,49 @@ function ReviewCard({ c, canDel, onDelete }: {
           </button>
         )}
       </div>
-      <div className="mt-2 line-clamp-3 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]">
-        {renderReviewText(textOf(c))}
+      <div className={`mt-2 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] ${isLong ? "line-clamp-3" : ""}`}>
+        {renderReviewText(raw)}
       </div>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-1 self-start font-figma-copy text-[0.9rem] text-[var(--figma-red)] hover:underline"
+        >
+          Read more
+        </button>
+      )}
       <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="relative max-h-[80vh] w-full max-w-lg overflow-y-auto bg-[var(--figma-bg)] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">
+                {stars(c.rating)} <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
+              {renderReviewText(raw)}
+            </div>
+            <p className="mt-4 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
