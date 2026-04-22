@@ -239,7 +239,7 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
             <button ref={confirmRef} type="button" disabled={isDeleting} onClick={() => onDelete(c._id)}>
               {isDeleting ? (
                 <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="12" color="Red"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="32" strokeDashoffset="12" color="#B71422"/>
                 </svg>
               ) : (
                 <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
