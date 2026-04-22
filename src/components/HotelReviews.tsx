@@ -447,7 +447,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   return (
     <>
-      <section className="mt-8 border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
+      <section className="border border-[rgba(171,25,46,0.08)] bg-[rgba(255,245,244,0.45)] p-5 sm:p-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
             Reviews ({comments.length}){avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
