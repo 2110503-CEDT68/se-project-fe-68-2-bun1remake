@@ -11,6 +11,7 @@ import { CommentItem } from "@/interface";
 import { createComment, deleteComment, getComments } from "@/libs/commentsApi";
 import { useDismissibleNotice } from "@/libs/useDismissibleNotice";
 import DismissibleNotice from "@/components/DismissibleNotice";
+import Arrow from "./Arrow";
 
 const PAGE_SIZE = 6;
 
@@ -235,9 +236,9 @@ function ReviewCard({ c, canDel, onDelete }: {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-1 self-start font-figma-copy text-[0.9rem] text-[var(--figma-red)] hover:underline"
+          className="mt-1 self-start font-figma-copy text-[0.9rem] text-[var(--figma-red)] underline"
         >
-          Read more
+          Read full review
         </button>
       )}
       <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
@@ -261,7 +262,7 @@ function ReviewCard({ c, canDel, onDelete }: {
                 className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
                 aria-label="Close"
               >
-                ×
+                <img src="/cross.svg" alt="x"/>
               </button>
             </div>
             <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
@@ -460,7 +461,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
             aria-label={showForm ? "Close" : "Write a review"}
           >
-            {showForm ? "×" : "+"}
+            {showForm ? <img src="/addhotel.svg" alt="Close" className="rotate-45" /> : <img src="/addhotel.svg" alt="+" />}
           </button>
         </div>
 
@@ -546,10 +547,15 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
               </div>
             </div>
             {totalPages > 1 && (
-              <div className="mt-6 flex items-center gap-3">
-                <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Previous">‹</button>
-                <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">{start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}</span>
-                <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Next">›</button>
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Previous">
+                  <Arrow direction="left"/>
+                </button>
+                <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">showing {start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}</span>
+                <button type="button" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="text-[var(--figma-red)] disabled:opacity-30" aria-label="Next">
+                  <Arrow direction="right"/>
+
+                </button>
               </div>
             )}
           </>
