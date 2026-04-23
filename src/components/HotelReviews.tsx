@@ -250,6 +250,9 @@ function ReviewCard({
           <span className="text-[1.05rem] text-[var(--figma-red)]"> 
           ★
           </span>
+          <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
+            {nameOf(c)}
+          </span>
         </div>
         {/* edit number larger and edit full read full reviews  */}
 
