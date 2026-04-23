@@ -249,7 +249,9 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
               ) : (
                 <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
                   Confirm to DELETE
-                  <img src="/delete.svg" width={21.33} height={24} alt="" />
+                  <svg width="21" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.33301 28C8.59967 28 7.9719 27.7389 7.44967 27.2167C6.92745 26.6944 6.66634 26.0667 6.66634 25.3333V8H5.33301V5.33333H11.9997V4H19.9997V5.33333H26.6663V8H25.333V25.3333C25.333 26.0667 25.0719 26.6944 24.5497 27.2167C24.0275 27.7389 23.3997 28 22.6663 28H9.33301ZM22.6663 8H9.33301V25.3333H22.6663V8ZM11.9997 22.6667H14.6663V10.6667H11.9997V22.6667ZM17.333 22.6667H19.9997V10.6667H17.333V22.6667Z" fill="white"/>
+                  </svg>
                 </div>
               )}
             </button>
@@ -258,7 +260,9 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
             <button type="button"onClick={() => setConfirming(true)}
               className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
               aria-label="Delete review">
-              <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
+              <svg width="21" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.33301 28C8.59967 28 7.9719 27.7389 7.44967 27.2167C6.92745 26.6944 6.66634 26.0667 6.66634 25.3333V8H5.33301V5.33333H11.9997V4H19.9997V5.33333H26.6663V8H25.333V25.3333C25.333 26.0667 25.0719 26.6944 24.5497 27.2167C24.0275 27.7389 23.3997 28 22.6663 28H9.33301ZM22.6663 8H9.33301V25.3333H22.6663V8ZM11.9997 22.6667H14.6663V10.6667H11.9997V22.6667ZM17.333 22.6667H19.9997V10.6667H17.333V22.6667Z" fill="#B71422"/>
+              </svg>
             </button>
           )
         )}
@@ -297,7 +301,9 @@ function ReviewCard({ c, canDel, onDelete, isDeleting }: {
                 className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
                 aria-label="Close"
               >
-                <img src="/cross.svg" alt="x"/>
+                <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1.86667 18.6667L0 16.8L7.46667 9.33333L0 1.86667L1.86667 0L9.33333 7.46667L16.8 0L18.6667 1.86667L11.2 9.33333L18.6667 16.8L16.8 18.6667L9.33333 11.2L1.86667 18.6667Z" fill="#B71422"/>
+                </svg>
               </button>
             </div>
             <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
