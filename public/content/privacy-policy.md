@@ -2,7 +2,7 @@
 
 **Last updated: 22 April 2026**
 
-This privacy notice for **Bun1 Hotel Booking** (“Company,” “we,” “us,” or “our“), describes how and why we might collect, store, use, and/or share (“process“) your information when you use our services (“Services“), such as when you:
+This privacy notice for **Bun1 Hotel Booking** ("Company," "we," "us," or "our"), describes how and why we might collect, store, use, and/or share ("process") your information when you use our services ("Services"), such as when you:
 
 - Visit our website at [https://se-project-fe-68-2-bun1remake.vercel.app/](https://se-project-fe-68-2-bun1remake.vercel.app/), or any website of ours that links to this privacy notice.
 - Use our applications.
@@ -32,20 +32,20 @@ Want to learn more about what Bun1 hotel booking does with any information we co
 
 ## TABLE OF CONTENTS
 
-1. [WHAT INFORMATION DO WE COLLECT?](#1-what-information-do-we-collect)
-2. [HOW DO WE PROCESS YOUR INFORMATION?](#2-how-do-we-process-your-information)
-3. [WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR PERSONAL INFORMATION?](#3-what-legal-bases-do-we-rely-on-to-process-your-personal-information)
-4. [WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?](#4-when-and-with-whom-do-we-share-your-personal-information)
-5. [WHAT IS OUR STANCE ON THIRD-PARTY WEBSITES?](#5-what-is-our-stance-on-third-party-websites)
-6. [DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?](#6-do-we-use-cookies-and-other-tracking-technologies)
-7. [IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?](#7-is-your-information-transferred-internationally)
-8. [HOW LONG DO WE KEEP YOUR INFORMATION?](#8-how-long-do-we-keep-your-information)
-9. [HOW DO WE KEEP YOUR INFORMATION SAFE?](#9-how-do-we-keep-your-information-safe)
-10. [DO WE COLLECT INFORMATION FROM MINORS?](#10-do-we-collect-information-from-minors)
-11. [WHAT ARE YOUR PRIVACY RIGHTS?](#11-what-are-your-privacy-rights)
-12. [CONTROLS FOR DO-NOT-TRACK FEATURES](#12-controls-for-do-not-track-features)
-13. [DO WE MAKE UPDATES TO THIS NOTICE?](#13-do-we-make-updates-to-this-notice)
-14. [HOW CAN YOU CONTACT US ABOUT THIS NOTICE?](#14-how-can-you-contact-us-about-this-notice)
+1. [1. WHAT INFORMATION DO WE COLLECT?](#1-what-information-do-we-collect)
+2. [2. HOW DO WE PROCESS YOUR INFORMATION?](#2-how-do-we-process-your-information)
+3. [3. WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR PERSONAL INFORMATION?](#3-what-legal-bases-do-we-rely-on-to-process-your-personal-information)
+4. [4. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?](#4-when-and-with-whom-do-we-share-your-personal-information)
+5. [5. WHAT IS OUR STANCE ON THIRD-PARTY WEBSITES?](#5-what-is-our-stance-on-third-party-websites)
+6. [6. DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?](#6-do-we-use-cookies-and-other-tracking-technologies)
+7. [7. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?](#7-is-your-information-transferred-internationally)
+8. [8. HOW LONG DO WE KEEP YOUR INFORMATION?](#8-how-long-do-we-keep-your-information)
+9. [9. HOW DO WE KEEP YOUR INFORMATION SAFE?](#9-how-do-we-keep-your-information-safe)
+10. [10. DO WE COLLECT INFORMATION FROM MINORS?](#10-do-we-collect-information-from-minors)
+11. [11. WHAT ARE YOUR PRIVACY RIGHTS?](#11-what-are-your-privacy-rights)
+12. [12. CONTROLS FOR DO-NOT-TRACK FEATURES](#12-controls-for-do-not-track-features)
+13. [13. DO WE MAKE UPDATES TO THIS NOTICE?](#13-do-we-make-updates-to-this-notice)
+14. [14. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?](#14-how-can-you-contact-us-about-this-notice)
 
 ---
 
@@ -84,7 +84,7 @@ Like many businesses, we also collect information through cookies and similar te
 
 The information we collect includes:
 
-- **Log and Usage Data.** Log and usage data is service-related, diagnostic, usage, and performance information our servers automatically collect when you access or use our Services and which we record in log files. Depending on how you interact with us, this log data may include your IP address, device information, browser type, and settings and information about your activity in the Services (such as the date/time stamps associated with your usage, pages and files viewed, searches, and other actions you take such as which features you use), device event information (such as system activity, error reports (sometimes called “crash dumps”), and hardware settings).
+- **Log and Usage Data.** Log and usage data is service-related, diagnostic, usage, and performance information our servers automatically collect when you access or use our Services and which we record in log files. Depending on how you interact with us, this log data may include your IP address, device information, browser type, and settings and information about your activity in the Services (such as the date/time stamps associated with your usage, pages and files viewed, searches, and other actions you take such as which features you use), device event information (such as system activity, error reports (sometimes called "crash dumps"), and hardware settings).
 - **Device Data.** We collect device data such as information about your computer, phone, tablet, or other device you use to access the Services. Depending on the device used, this device data may include information such as your IP address (or proxy server), device and application identification numbers, location, browser type, hardware model, Internet service provider and/or mobile carrier, operating system, and system configuration information.
 
 ### Information collected from other sources
@@ -120,7 +120,7 @@ We process your personal information for a variety of reasons, depending on how 
 
 **In Short:** _We may share information in specific situations described in this section and/or with the following categories of third parties._
 
-**Vendors, Consultants, and Other Third-Party Service Providers.** We may share your data with third-party vendors, service providers, contractors, or agents (“third parties”) who perform services for us or on our behalf and require access to such information to do that work. They will also not share your personal information with any organization apart from us. They also commit to protect the data they hold on our behalf and to retain it for the period we instruct. The categories of third parties we may share personal information with are as follows:
+**Vendors, Consultants, and Other Third-Party Service Providers.** We may share your data with third-party vendors, service providers, contractors, or agents ("third parties") who perform services for us or on our behalf and require access to such information to do that work. They will also not share your personal information with any organization apart from us. They also commit to protect the data they hold on our behalf and to retain it for the period we instruct. The categories of third parties we may share personal information with are as follows:
 
 - Cloud Computing Services
 - Data Storage Service Provider
@@ -156,7 +156,7 @@ We may use cookies and similar tracking technologies (like json web token) to ac
 
 **In Short:** _We may transfer, store, and process your information in countries other than your own._
 
-We use a cloud database provider so we cannot make sure of the region. If you are accessing our Services from outside, please be aware that your information may be transferred to, stored, and processed by us in our facilities and by those third parties with whom we may share your personal information (see “WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?” above), in other countries.
+We use a cloud database provider so we cannot make sure of the region. If you are accessing our Services from outside, please be aware that your information may be transferred to, stored, and processed by us in our facilities and by those third parties with whom we may share your personal information (see "WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?" above), in other countries.
 
 Please be sure to review the following sections of this Privacy Notice:
 
@@ -197,9 +197,9 @@ We do not knowingly solicit data from or market to children under 18 years of ag
 
 **In short:** _In some regions, such as Thailand , the European Economic Area (EEA), United Kingdom (UK), and Canada, you have rights that allow you greater access to and control over your personal information. You may review, change, or terminate your account at any time._
 
-If you are located in Thailand, you have specific rights under the **Personal Data Protection Act (PDPA) B.E. 2562 (2019)**, the contact details for the data protection authorities are available here: [https://law.prd.go.th/th/file/get/file/20231122b19b536a4647f29a6d99e228909779b4120136.PDF](https://law.prd.go.th/th/file/get/file/20231122b19b536a4647f29a6d99e228909779b4120136.PDF)
+If you are located in Thailand, you have specific rights under the **Personal Data Protection Act (PDPA) B.E. 2562 (2019)**, the contact details for the data protection authorities are available here: [https://law.prd.go.th/th/file/get/file/20231122b19b536a4647f29a6d99e228909779b4120136.PDF](https://law.prd.go.th/th/file/get/file/20231122b19b536a4647f29a6d99e228909779b4120136.PDF).
 
-In some regions (like the EEA, UK, and Canada), you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; and (iv) if applicable, to data portability. In certain circumstances, you may also have the right to object to the processing of your personal information. You can make such a request by contacting us by using the contact details provided in the section “HOW CAN YOU CONTACT US ABOUT THIS NOTICE?” below.
+In some regions (like the EEA, UK, and Canada), you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; and (iv) if applicable, to data portability. In certain circumstances, you may also have the right to object to the processing of your personal information. You can make such a request by contacting us by using the contact details provided in the section "HOW CAN YOU CONTACT US ABOUT THIS NOTICE?" below.
 
 We will consider and act upon any request in accordance with applicable data protection laws.
 
@@ -207,7 +207,7 @@ If you are located in the EEA or UK and you believe we are unlawfully processing
 
 If you are located in Switzerland, the contact details for the data protection authorities are available here: [https://www.edoeb.admin.ch/edoeb/en/home.html](https://www.edoeb.admin.ch/edoeb/en/home.html).
 
-**Withdrawing your consent:** If we are relying on your consent to process your personal information, which may be express and/or implied consent depending on the applicable law, you have the right to withdraw your consent at any time. You can withdraw your consent at any time by contacting us by using the contact details provided in the section “HOW CAN YOU CONTACT US ABOUT THIS NOTICE?” below or updating your preferences.
+**Withdrawing your consent:** If we are relying on your consent to process your personal information, which may be express and/or implied consent depending on the applicable law, you have the right to withdraw your consent at any time. You can withdraw your consent at any time by contacting us by using the contact details provided in the section "HOW CAN YOU CONTACT US ABOUT THIS NOTICE?" below or updating your preferences.
 
 However, please note that this will not affect the lawfulness of the processing before its withdrawal, nor when applicable law allows, will it affect the processing of your personal information conducted in reliance on lawful processing grounds other than consent.
 
@@ -228,7 +228,7 @@ If you have questions or comments about this notice, you may contact us at **Bun
 
 ## 12. CONTROLS FOR DO-NOT-TRACK FEATURES
 
-Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track (“DNT”) feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this privacy notice.
+Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ("DNT") feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage no uniform technology standard for recognizing and implementing DNT signals has been finalized. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this privacy notice.
 What categories of personal information do we collect?
 
 ---
@@ -237,10 +237,12 @@ What categories of personal information do we collect?
 
 **In Short:** _Yes, we will update this notice as necessary to stay compliant with relevant laws._
 
-We may update this privacy notice from time to time. The updated version will be indicated by an updated “Revised” date and the updated version will be effective as soon as it is accessible. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.
+We may update this privacy notice from time to time. The updated version will be indicated by an updated "Revised" date and the updated version will be effective as soon as it is accessible. We encourage you to review this privacy notice frequently to be informed of how we are protecting your information.
 
 ---
 
 ## 14. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?
 
 If you have questions or comments about this notice, you may contact our team at **Bun1.hotel.demo@gmail.com**
+
+===
