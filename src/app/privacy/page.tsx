@@ -2,8 +2,8 @@ import fs from "fs";
 import path from "path";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import BackToTop from "@/components/BackToTop";
 import PolicySidebar from "@/components/PolicySidebar";
+import BackToTop from "@/components/BackToTop";
 
 export default async function PrivacyPolicy() {
   // 1. Get the path to the markdown file
@@ -23,10 +23,10 @@ export default async function PrivacyPolicy() {
 
   return (
     <main className="w-full h-screen overflow-hidden">
-      <div id="top" />
       {/* 3. Render the Markdown */}
       <PolicySidebar headings={headings}>
         <div className="max-w-none">
+          <div id="policy-start" className="pt-10" />
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{

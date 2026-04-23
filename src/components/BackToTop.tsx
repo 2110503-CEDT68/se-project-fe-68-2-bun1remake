@@ -1,26 +1,27 @@
 "use client";
+import Arrow from "./Arrow";
 
 export default function BackToTop() {
+  const scrollToHeader = () => {
+    // Find the element we want to scroll to
+    const topElement = document.getElementById("policy-start");
+
+    if (topElement) {
+      // scrollIntoView works perfectly with the overflow-y-auto container
+      topElement.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Fallback: Scroll the container to 0 if ID isn't found
+      const scrollContainer = document.querySelector("main.overflow-y-auto");
+      scrollContainer?.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="figma-link font-figma-nav text-sm flex items-center gap-2 mb-8 group cursor-pointer"
+      onClick={scrollToHeader}
+      className="figma-link font-figma-nav text-sm flex items-center gap-2 mt-12 mb-8 group cursor-pointer border-none bg-transparent p-0"
     >
-      <svg
-        width="12"
-        height="12"
-        viewBox="0 0 12 12"
-        fill="none"
-        className="group-hover:-translate-y-1 transition-transform"
-      >
-        <path
-          d="M6 10V2M6 2L2 6M6 2L10 6"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <Arrow direction="top" />
       Back to Top
     </button>
   );

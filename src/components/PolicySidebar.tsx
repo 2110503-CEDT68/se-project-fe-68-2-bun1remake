@@ -19,7 +19,7 @@ export default function ExpandableShell({
     <div className="h-screen w-screen overflow-hidden flex flex-row relative">
       {/* 1. FIXED SIDEBAR (Sticks to the left of the screen) */}
       <aside
-        className={`absolute top-0 left-0 h-screen z-50 bg-[var(--figma-bg)] border-r border-[var(--figma-border)] transition-transform duration-500 ease-in-out overflow-y-auto shadow-2xl w-80
+        className={`absolute top-0 left-0 h-screen z-50 bg-[var(--figma-bg)] border-r border-[var(--figma-border)] transition-transform duration-500 ease-in-out overflow-y-auto shadow-2xl w-full md:w-80
           ${isOpen ? "translate-x-0" : "-translate-x-full"} w-80`}
       >
         {" "}
@@ -34,7 +34,7 @@ export default function ExpandableShell({
                   onClick={() => {
                     if (window.innerWidth < 768) setIsOpen(false);
                   }}
-                  className="font-figma-copy text-xl text-[var(--figma-ink-soft)] hover:text-[var(--figma-red)] transition-all block hover:translate-x-2"
+                  className="font-figma-copy text-xl text-[var(--figma-ink-soft)] hover:text-[var(--figma-red)] transition-all duration-500 block hover:translate-x-2 ease-in-out"
                 >
                   {h}
                 </a>
@@ -45,7 +45,7 @@ export default function ExpandableShell({
       </aside>
 
       {/* 2. THE FLOATING TOGGLE BUTTON */}
-      <div className="fixed top-10 left-10 z-[60] flex items-center gap-6 pointer-events-none">
+      <div className="fixed top-6 left-6 md:top-10 md:left-10 z-[60] flex items-center gap-6 pointer-events-none">
         {/* Button - pointer-events-auto allows clicking despite the parent container */}
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -78,9 +78,9 @@ export default function ExpandableShell({
       */}
       <div
         className={`h-full flex-1 overflow-x-hidden overflow-y-auto transition-all duration-500 ease-in-out
-          ${isOpen ? "pl-80" : "pl-0"}`}
+          ${isOpen ? "md:pl-80 pl-0" : "pl-0"}`}
       >
-        <div className="max-w-4xl mx-auto px-6 py-11">{children}</div>
+        <div className="max-w-4xl mx-auto px-6 pb-6">{children}</div>
       </div>
     </div>
   );
