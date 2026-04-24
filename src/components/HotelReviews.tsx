@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,18 +11,19 @@ import { CommentItem } from "@/interface";
 import { createComment, deleteComment, getComments } from "@/libs/commentsApi";
 import { useDismissibleNotice } from "@/libs/useDismissibleNotice";
 import DismissibleNotice from "@/components/DismissibleNotice";
+import Arrow from "./Arrow";
 
 const PAGE_SIZE = 6;
 
 type UserLike = { _id?: string; name?: string };
 function userObj(c: CommentItem): UserLike | null {
-  return (typeof c.user === "object" ? c.user : null) as UserLike | null;
+  return (c.user && typeof c.user === "object" ? c.user : null) as UserLike | null;
 }
-const userIdOf = (c: CommentItem) =>
-  typeof c.user === "string" ? c.user : userObj(c)?._id || "";
-const nameOf = (c: CommentItem) => userObj(c)?.name || "Guest";
+const userIdOf = (c: CommentItem) => (typeof c.user === "string" ? c.user : userObj(c)?._id || "");
+const nameOf = (c: CommentItem) => userObj(c)?.name || c.guestName || "Guest";
 const textOf = (c: CommentItem) => c.text || c.comment || "";
 const dateOf = (c: CommentItem) => c.createdAt || c.commentDate || "";
+
 function relTime(d: string): string {
   if (!d) return "";
   const diff = Date.now() - new Date(d).getTime();
@@ -35,6 +37,7 @@ function relTime(d: string): string {
   const p = (n: number, u: string) => `${n} ${u}${n > 1 ? "s" : ""}`;
   const two = (a: number, ua: string, b: number, ub: string) =>
     b > 0 ? `${p(a, ua)} and ${p(b, ub)} ago` : `${p(a, ua)} ago`;
+
   if (years > 0) return two(years, "year", months - years * 12, "month");
   if (months > 0) return two(months, "month", days - months * 30, "day");
   if (days > 0) return two(days, "day", hours - days * 24, "hour");
@@ -43,9 +46,10 @@ function relTime(d: string): string {
     return two(minutes, "minute", seconds - minutes * 60, "second");
   return "just now";
 }
-function stars(r: number): string {
-  const n = Math.max(0, Math.min(5, Math.round(Number(r) || 0)));
-  return "★".repeat(n) + "☆".repeat(5 - n);
+
+function ratingDisplay(r: number): string {
+  const n = Math.max(0, Math.min(5, Number(r) || 0));
+  return `${n.toFixed(1)}★`;
 }
 
 type InlineFormat = "bold" | "italic" | "underline" | "strikethrough";
@@ -226,47 +230,146 @@ function ReviewCard({
   c,
   canDel,
   onDelete,
+  isDeleting,
 }: {
   c: CommentItem;
   canDel: boolean;
   onDelete: (id: string) => void;
+  isDeleting?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const raw = textOf(c);
+  const isLong = raw.split("\n").length > 3 || raw.length > 200;
+  const [confirming, setConfirming] = useState(false);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!confirming) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (confirmRef.current && !confirmRef.current.contains(e.target as Node)) {
+        setConfirming(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [confirming]);
+
   return (
-    <article className="flex flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
+    <article className="flex h-full flex-col border border-[rgba(171,25,46,0.08)] bg-white p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">
-            {stars(c.rating)}
+          <span className="text-[2.25rem] font-bold">
+            {Number(c.rating).toFixed(1)}
+          </span>
+          <span className="text-[1.75rem] text-[var(--figma-red)]"> 
+          ★
           </span>
           <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
             {nameOf(c)}
           </span>
         </div>
-        {canDel && (
-          <button
-            type="button"
-            onClick={() => onDelete(c._id)}
-            className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
-            aria-label="Delete review"
+        {/* edit number larger and edit full read full reviews  */}
+
+        {canDel &&
+          (confirming ? (
+            <button
+              ref={confirmRef}
+              type="button"
+              disabled={isDeleting}
+              onClick={() => onDelete(c._id)}
+            >
+              {isDeleting ? (
+                <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeDasharray="32"
+                    strokeDashoffset="12"
+                    color="#B71422"
+                  />
+                </svg>
+              ) : (
+                <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
+                  Confirm to DELETE
+                  <img src="/delete.svg" width={21.33} height={24} alt="" />
+                </div>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirming(true)}
+              className="shrink-0 text-[var(--figma-red)] opacity-60 hover:opacity-100"
+              aria-label="Delete review"
+            >
+              <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
+            </button>
+          ))}
+      </div>
+
+      <div
+        className={`mt-2 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)] ${
+          isLong ? "line-clamp-3" : ""
+        }`}
+      >
+        {renderReviewText(raw)}
+      </div>
+
+      <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+        <div>
+          {isLong && (
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="font-figma-copy text-[0.9rem] text-[var(--figma-red)] underline"
+            >
+              Read full review
+            </button>
+          )}
+        </div>
+
+        <p className="text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
+          {relTime(dateOf(c))}
+        </p>
+      </div>
+
+      {open &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setOpen(false)}
           >
-            <svg width="14" height="16" viewBox="0 0 14 16" fill="none">
-              <path
-                d="M1 4h12M5 4V2h4v2M2 4l1 10h8l1-10H2z"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+            <div
+              className="relative max-h-[80vh] w-full max-w-lg overflow-y-auto bg-[var(--figma-bg)] p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <span className="font-figma-copy text-[1.05rem] text-[var(--figma-red)]">
+                  {ratingDisplay(c.rating)}{" "}
+                  <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="shrink-0 text-[1.8rem] leading-none text-[var(--figma-ink-soft)] hover:text-[var(--figma-ink)]"
+                  aria-label="Close"
+                >
+                  <img src="/cross.svg" alt="x" />
+                </button>
+              </div>
+              <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
+                {renderReviewText(raw)}
+              </div>
+              <p className="mt-4 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
+                {relTime(dateOf(c))}
+              </p>
+            </div>
+          </div>,
+          document.body
         )}
-      </div>
-      <div className="mt-2 line-clamp-3 wrap-break-word font-figma-copy text-[1rem] leading-snug text-[var(--figma-ink)]">
-        {renderReviewText(textOf(c))}
-      </div>
-      <p className="mt-auto pt-3 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
-        {relTime(dateOf(c))}
-      </p>
     </article>
   );
 }
@@ -285,11 +388,13 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
+  const [guestName] = useState(() => "Guest-" + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [submitting, setSubmitting] = useState(false);
   const [activeFormats, setActiveFormats] =
     useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const recalcAvg = (list: CommentItem[]) =>
     list.length === 0
@@ -297,7 +402,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       : parseFloat(
           (
             list.reduce((s, c) => s + (Number(c.rating) || 0), 0) / list.length
-          ).toFixed(2),
+          ).toFixed(2)
         );
 
   useEffect(() => {
@@ -327,7 +432,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   }, [hotelId]);
 
   const canDel = (c: CommentItem) =>
-    role === "admin" || (role === "user" && !!uid && userIdOf(c) === uid);
+    !!token && (role === "admin" || (role === "user" && !!uid && !!userIdOf(c) && userIdOf(c) === uid));
 
   const syncTextFromEditor = () => {
     const editor = editorRef.current;
@@ -393,16 +498,25 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const submit = async () => {
     const latestText = syncTextFromEditor();
     if (!token) return;
-    if (!latestText.trim())
-      return showNotice({ type: "error", message: "Please write a comment." });
+    if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
     setSubmitting(true);
     try {
-      const r = await createComment(hotelId, token, {
+      const payload: { comment: string; rating: number; guestName?: string } = {
         comment: latestText.trim(),
         rating,
-      });
+      };
+      if (!token) payload.guestName = guestName;
+
+      const r = await createComment(hotelId, token || null, payload);
       if (r?.data) {
-        const updated = [r.data, ...comments];
+        const savedAsUser = !!r.data.user;
+        const displayName = savedAsUser ? session?.user?.name || "You" : guestName.trim() || "Guest";
+        const enriched = {
+          ...r.data,
+          user: savedAsUser ? { _id: uid, name: displayName } : null,
+          guestName: savedAsUser ? undefined : displayName,
+        };
+        const updated = [enriched, ...comments];
         setComments(updated);
         setAvg(recalcAvg(updated));
       }
@@ -413,10 +527,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
-      showNotice({
-        type: "error",
-        message: e instanceof Error ? e.message : "Failed to submit.",
-      });
+      const msg = e instanceof Error ? e.message : "Failed to submit.";
+      const friendly = !token && /not authorized|unauthorized/i.test(msg)
+        ? "Guest comments aren't available right now. Please log in to leave a review."
+        : msg;
+      showNotice({ type: "error", message: friendly });
     } finally {
       setSubmitting(false);
     }
@@ -424,16 +539,16 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const del = async (id: string) => {
     if (!token) return;
+    setDeletingId(id);
     try {
       await deleteComment(id, token);
       const rest = comments.filter((c) => c._id !== id);
       setComments(rest);
       setAvg(recalcAvg(rest));
     } catch (e) {
-      showNotice({
-        type: "error",
-        message: e instanceof Error ? e.message : "Failed to delete.",
-      });
+      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -449,42 +564,23 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-figma-copy text-[2rem] text-[var(--figma-ink)] sm:text-[2.5rem]">
             Reviews ({comments.length})
-            {avg !== null && (
-              <span className="pl-2 ml-2 text-[var(--figma-red)]">
-                {avg.toFixed(1)}★
-              </span>
-            )}
+            {avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
           </h2>
-          {token && (
-            <button
-              type="button"
-              onClick={toggleForm}
-              className="
-    flex h-8 w-8 sm:h-10 sm:w-10 
-    items-center justify-center 
-    bg-[var(--figma-red-strong)] 
-    text-white 
-    transition-all duration-200
-    hover:brightness-90 
-    active:scale-95
-    focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--figma-red-strong)]
-  "
-              aria-label={showForm ? "Close" : "Write a review"}
-            >
-              <span
-                className="
-    text-[2.4rem] sm:text-[2.8rem] 
-    font-light 
-    leading-[0] -translate-y-[6px]
-  "
-              >
-                {showForm ? "×" : "+"}
-              </span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={toggleForm}
+            className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+            aria-label={showForm ? "Close" : "Write a review"}
+          >
+            {showForm ? (
+              <img src="/addhotel.svg" alt="Close" className="rotate-45" />
+            ) : (
+              <img src="/addhotel.svg" alt="+" />
+            )}
+          </button>
         </div>
 
-        {showForm && token && (
+        {showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
             <div className="flex items-center gap-3">
               <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">
@@ -496,7 +592,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                     key={v}
                     type="button"
                     onClick={() => setRating(v)}
-                    className={`text-[1.6rem] leading-none ${v <= rating ? "text-[var(--figma-red)]" : "text-[rgba(171,25,46,0.2)]"}`}
+                    className={`text-[1.6rem] leading-none ${
+                      v <= rating ? "text-[var(--figma-red)]" : "text-[rgba(171,25,46,0.2)]"
+                    }`}
                     aria-label={`Rate ${v}`}
                   >
                     ★
@@ -504,6 +602,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                 ))}
               </div>
             </div>
+
             <div className="border border-[rgba(171,25,46,0.18)] bg-[rgba(255,245,244,0.6)]">
               <div className="relative">
                 {text.trim().length === 0 && (
@@ -531,6 +630,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   className="min-h-[140px] w-full whitespace-pre-wrap break-words bg-transparent p-4 font-figma-copy text-[1.05rem] text-[var(--figma-ink)] focus:outline-none"
                 />
               </div>
+
               <div className="border-t border-[rgba(171,25,46,0.2)] px-4 py-2">
                 <div className="flex flex-wrap items-center gap-5">
                   {FORMAT_BUTTONS.map((btn) => (
@@ -539,7 +639,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => applyInlineFormat(btn.kind)}
-                      className={`flex h-9 min-w-9 items-center justify-center border px-2 font-figma-nav text-[1.7rem] transition-colors ${activeFormats[btn.kind] ? "border-[#B71422] bg-[#B71422] text-[#FBEFDF]" : "border-transparent text-[rgba(250,170,170,0.95)] hover:text-[var(--figma-red)]"} ${btn.className || ""}`}
+                      className={`flex h-9 min-w-9 items-center justify-center border px-2 font-figma-nav text-[1.7rem] transition-colors ${
+                        activeFormats[btn.kind]
+                          ? "border-[#B71422] bg-[#B71422] text-[#FBEFDF]"
+                          : "border-transparent text-[rgba(250,170,170,0.95)] hover:text-[var(--figma-red)]"
+                      } ${btn.className || ""}`}
                       aria-label={btn.ariaLabel}
                     >
                       {btn.glyph}
@@ -548,7 +652,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                 </div>
               </div>
             </div>
+
             <DismissibleNotice notice={notice} onClose={dismissNotice} />
+
             <button
               type="button"
               onClick={() => void submit()}
@@ -568,7 +674,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                 setTab("all");
                 setPage(1);
               }}
-              className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "all" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}
+              className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${
+                tab === "all"
+                  ? "bg-[var(--figma-red)] text-white"
+                  : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"
+              }`}
             >
               All reviews
             </button>
@@ -579,7 +689,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   setTab("yours");
                   setPage(1);
                 }}
-                className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${tab === "yours" ? "bg-[var(--figma-red)] text-white" : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"}`}
+                className={`px-4 py-1.5 font-figma-copy text-[1.05rem] ${
+                  tab === "yours"
+                    ? "bg-[var(--figma-red)] text-white"
+                    : "border border-[rgba(171,25,46,0.2)] text-[var(--figma-ink)]"
+                }`}
               >
                 Your reviews
               </button>
@@ -593,9 +707,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
           </p>
         ) : filtered.length === 0 ? (
           <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
-            {tab === "yours"
-              ? "You haven't reviewed this hotel yet."
-              : "No ratings yet"}
+            {tab === "yours" ? "You haven't reviewed this hotel yet." : "No ratings yet"}
           </p>
         ) : (
           <>
@@ -606,11 +718,13 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   c={c}
                   canDel={canDel(c)}
                   onDelete={(id) => void del(id)}
+                  isDeleting={deletingId === c._id}
                 />
               ))}
             </div>
+
             {totalPages > 1 && (
-              <div className="mt-6 flex items-center gap-3">
+              <div className="mt-6 flex items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -618,11 +732,10 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   className="text-[var(--figma-red)] disabled:opacity-30"
                   aria-label="Previous"
                 >
-                  ‹
+                  <Arrow direction="left" />
                 </button>
                 <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
-                  {start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of{" "}
-                  {filtered.length}
+                  showing {start + 1}–{Math.min(start + PAGE_SIZE, filtered.length)} of {filtered.length}
                 </span>
                 <button
                   type="button"
@@ -631,7 +744,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   className="text-[var(--figma-red)] disabled:opacity-30"
                   aria-label="Next"
                 >
-                  ›
+                  <Arrow direction="right" />
                 </button>
               </div>
             )}
