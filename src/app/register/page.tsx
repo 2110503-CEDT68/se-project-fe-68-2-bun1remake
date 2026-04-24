@@ -125,7 +125,7 @@ function RegisterForm() {
           <label className="font-figma-copy text-[2rem] text-[var(--figma-red-soft)]">
             <span className="sr-only">Phone Number</span>
             <input
-              type="tel"
+              type="telephone"
               value={telephone}
               onChange={(event) => setTelephone(event.target.value.replace(/\D/g, ""))}
               className="figma-input"
