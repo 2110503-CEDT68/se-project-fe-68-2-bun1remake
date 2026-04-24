@@ -42,7 +42,8 @@ function relTime(d: string): string {
   if (months > 0) return two(months, "month", days - months * 30, "day");
   if (days > 0) return two(days, "day", hours - days * 24, "hour");
   if (hours > 0) return two(hours, "hour", minutes - hours * 60, "minute");
-  if (minutes > 0) return two(minutes, "minute", seconds - minutes * 60, "second");
+  if (minutes > 0)
+    return two(minutes, "minute", seconds - minutes * 60, "second");
   return "just now";
 }
 
@@ -61,8 +62,18 @@ const FORMAT_BUTTONS: Array<{
   ariaLabel: string;
 }> = [
   { kind: "bold", glyph: "B", ariaLabel: "Apply bold" },
-  { kind: "italic", glyph: "I", className: "italic", ariaLabel: "Apply italic" },
-  { kind: "underline", glyph: "U", className: "underline", ariaLabel: "Apply underline" },
+  {
+    kind: "italic",
+    glyph: "I",
+    className: "italic",
+    ariaLabel: "Apply italic",
+  },
+  {
+    kind: "underline",
+    glyph: "U",
+    className: "underline",
+    ariaLabel: "Apply underline",
+  },
   {
     kind: "strikethrough",
     glyph: "S",
@@ -80,7 +91,9 @@ function emptyFormatState(): FormatState {
   };
 }
 
-function commandFor(kind: InlineFormat): "bold" | "italic" | "underline" | "strikeThrough" {
+function commandFor(
+  kind: InlineFormat,
+): "bold" | "italic" | "underline" | "strikeThrough" {
   switch (kind) {
     case "bold":
       return "bold";
@@ -129,7 +142,8 @@ function serializeEditorNode(node: Node): string {
     if (isBold) styled = wrapTagged(styled, "strong");
     if (el.style.fontStyle === "italic") styled = wrapTagged(styled, "em");
 
-    const decoration = `${el.style.textDecoration} ${el.style.textDecorationLine}`.toLowerCase();
+    const decoration =
+      `${el.style.textDecoration} ${el.style.textDecorationLine}`.toLowerCase();
     if (decoration.includes("line-through")) styled = wrapTagged(styled, "s");
     if (decoration.includes("underline")) styled = wrapTagged(styled, "u");
 
@@ -247,7 +261,7 @@ function ReviewCard({
           <span className="text-[2.25rem] font-bold">
             {Number(c.rating).toFixed(1)}
           </span>
-          <span className="text-[1.05rem] text-[var(--figma-red)]"> 
+          <span className="text-[1.75rem] text-[var(--figma-red)]"> 
           ★
           </span>
           <span className="font-figma-copy text-[1rem] text-[var(--figma-ink)]">
@@ -376,7 +390,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [text, setText] = useState("");
   const [guestName] = useState(() => "Guest-" + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [submitting, setSubmitting] = useState(false);
-  const [activeFormats, setActiveFormats] = useState<FormatState>(emptyFormatState());
+  const [activeFormats, setActiveFormats] =
+    useState<FormatState>(emptyFormatState());
   const editorRef = useRef<HTMLDivElement | null>(null);
   const { notice, showNotice, dismissNotice } = useDismissibleNotice();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -399,7 +414,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         if (ignore) return;
         const list = Array.isArray(d?.data) ? d.data : [];
         setComments(list);
-        setAvg(typeof d?.averageRating === "number" ? d.averageRating : recalcAvg(list));
+        setAvg(
+          typeof d?.averageRating === "number"
+            ? d.averageRating
+            : recalcAvg(list),
+        );
       })
       .catch(() => {
         if (!ignore) setComments([]);
@@ -440,7 +459,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       return;
     }
 
-    const query = (command: "bold" | "italic" | "underline" | "strikeThrough") => {
+    const query = (
+      command: "bold" | "italic" | "underline" | "strikeThrough",
+    ) => {
       try {
         return document.queryCommandState(command);
       } catch {
@@ -476,6 +497,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const submit = async () => {
     const latestText = syncTextFromEditor();
+    if (!token) return;
     if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
     setSubmitting(true);
     try {
@@ -530,7 +552,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
     }
   };
 
-  const filtered = tab === "yours" ? comments.filter((c) => userIdOf(c) === uid) : comments;
+  const filtered =
+    tab === "yours" ? comments.filter((c) => userIdOf(c) === uid) : comments;
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const start = (page - 1) * PAGE_SIZE;
   const visible = filtered.slice(start, start + PAGE_SIZE);
@@ -560,7 +583,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         {showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
             <div className="flex items-center gap-3">
-              <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">Rating</span>
+              <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">
+                Rating
+              </span>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((v) => (
                   <button
@@ -677,7 +702,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
         )}
 
         {loading ? (
-          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">Loading…</p>
+          <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
+            Loading…
+          </p>
         ) : filtered.length === 0 ? (
           <p className="mt-5 font-figma-copy text-[1.3rem] text-[var(--figma-ink-soft)]">
             {tab === "yours" ? "You haven't reviewed this hotel yet." : "No ratings yet"}
