@@ -11,6 +11,7 @@ present.md
 .DS_store
 file_dump/
 .vscode/
+package-lock.json
 
 # Playwright
 /test-results/
