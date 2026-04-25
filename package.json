@@ -18,7 +18,7 @@
     "@tailwindcss/postcss": "^4.2.1",
     "@uploadthing/react": "^7.3.3",
     "dayjs": "^1.11.19",
-    "next": "15.4.8",
+    "next": "^15.5.15",
     "next-auth": "^4.24.11",
     "postcss": "^8.5.8",
     "react": "19.1.0",
