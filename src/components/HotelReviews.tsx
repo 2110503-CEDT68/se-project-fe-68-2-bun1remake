@@ -231,11 +231,13 @@ function ReviewCard({
   canDel,
   onDelete,
   isDeleting,
+  hotelName,
 }: {
   c: CommentItem;
   canDel: boolean;
   onDelete: (id: string) => void;
   isDeleting?: boolean;
+  hotelName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const raw = textOf(c);
@@ -280,16 +282,8 @@ function ReviewCard({
             >
               {isDeleting ? (
                 <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeDasharray="32"
-                    strokeDashoffset="12"
-                    color="#B71422"
-                  />
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"
+                    strokeDasharray="32" strokeDashoffset="12" color="#B71422" />
                 </svg>
               ) : (
                 <div className="flex items-center gap-1.5 bg-[var(--figma-red)] text-white font-figma-copy text-[0.85rem] shrink-0 disabled:opacity-50 border border-left-[var(--figma-red)] pl-2">
@@ -351,7 +345,6 @@ function ReviewCard({
                   {ratingDisplay(c.rating)}{" "}
                   <span className="text-[var(--figma-ink)]">{nameOf(c)}</span>
                 </span>
-
                 <div className="flex items-center gap-2">
                   {canDel &&
                     (confirming ? (
@@ -383,7 +376,6 @@ function ReviewCard({
                         <img src="/deleteRed.svg" width={21.33} height={24} alt="" />
                       </button>
                     ))}
-
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
@@ -397,9 +389,10 @@ function ReviewCard({
               <div className="wrap-break-word font-figma-copy text-[1.05rem] leading-relaxed text-[var(--figma-ink)]">
                 {renderReviewText(raw)}
               </div>
-              <p className="mt-4 text-right font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">
-                {relTime(dateOf(c))}
-              </p>
+              <div className="mt-4 flex items-end justify-between gap-2">
+                <p className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{hotelName}</p>
+                <p className="font-figma-copy text-[0.85rem] text-[var(--figma-ink-soft)]">{relTime(dateOf(c))}</p>
+              </div>
             </div>
           </div>,
           document.body
@@ -408,11 +401,12 @@ function ReviewCard({
   );
 }
 
-export default function HotelReviews({ hotelId }: { hotelId: string }) {
+export default function HotelReviews({ hotelId, hotelName }: { hotelId: string; hotelName?: string }) {
   const { data: session } = useSession();
   const token = session?.user?.token || "";
   const uid = session?.user?._id || "";
   const role = session?.user?.role || "";
+  const canWriteReview = !!token;
 
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [avg, setAvg] = useState<number | null>(null);
@@ -422,7 +416,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
-  const [guestName] = useState(() => "Guest-" + Math.random().toString(36).slice(2, 8).toUpperCase());
   const [submitting, setSubmitting] = useState(false);
   const [activeFormats, setActiveFormats] =
     useState<FormatState>(emptyFormatState());
@@ -521,6 +514,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
   };
 
   const toggleForm = () => {
+    if (!canWriteReview) return;
     if (showForm && editorRef.current) {
       editorRef.current.innerHTML = "";
       setText("");
@@ -531,24 +525,21 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
 
   const submit = async () => {
     const latestText = syncTextFromEditor();
-    if (!token) return;
     if (!latestText.trim()) return showNotice({ type: "error", message: "Please write a comment." });
+    if (!canWriteReview) return;
     setSubmitting(true);
     try {
-      const payload: { comment: string; rating: number; guestName?: string } = {
+      const payload = {
         comment: latestText.trim(),
         rating,
       };
-      if (!token) payload.guestName = guestName;
 
-      const r = await createComment(hotelId, token || null, payload);
+      const r = await createComment(hotelId, token, payload);
       if (r?.data) {
-        const savedAsUser = !!r.data.user;
-        const displayName = savedAsUser ? session?.user?.name || "You" : guestName.trim() || "Guest";
+        const displayName = session?.user?.name || "You";
         const enriched = {
           ...r.data,
-          user: savedAsUser ? { _id: uid, name: displayName } : null,
-          guestName: savedAsUser ? undefined : displayName,
+          user: { _id: uid, name: displayName },
         };
         const updated = [enriched, ...comments];
         setComments(updated);
@@ -561,11 +552,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       setShowForm(false);
       showNotice({ type: "success", message: "Review submitted." });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to submit.";
-      const friendly = !token && /not authorized|unauthorized/i.test(msg)
-        ? "Guest comments aren't available right now. Please log in to leave a review."
-        : msg;
-      showNotice({ type: "error", message: friendly });
+      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to submit." });
     } finally {
       setSubmitting(false);
     }
@@ -579,8 +566,9 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
       const rest = comments.filter((c) => c._id !== id);
       setComments(rest);
       setAvg(recalcAvg(rest));
+      showNotice({ type: "success", message: "Deleted a comment successfully" });
     } catch (e) {
-      showNotice({ type: "error", message: e instanceof Error ? e.message : "Failed to delete." });
+      showNotice({ type: "error", message: "Cannot delete this comment" });
     } finally {
       setDeletingId(null);
     }
@@ -600,21 +588,29 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             Reviews ({comments.length})
             {avg !== null && <span className="ml-2 text-[var(--figma-red)]">{avg.toFixed(1)}★</span>}
           </h2>
-          <button
-            type="button"
-            onClick={toggleForm}
-            className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
-            aria-label={showForm ? "Close" : "Write a review"}
-          >
-            {showForm ? (
-              <img src="/addhotel.svg" alt="Close" className="rotate-45" />
-            ) : (
-              <img src="/addhotel.svg" alt="+" />
-            )}
-          </button>
+          {canWriteReview && (
+            <button
+              type="button"
+              onClick={toggleForm}
+              className="flex h-12 w-12 shrink-0 items-center justify-center border border-[var(--figma-bg)] bg-[var(--figma-red-strong)] text-white font-figma-copy text-[2rem] leading-none sm:h-14 sm:w-14"
+              aria-label={showForm ? "Close" : "Write a review"}
+            >
+              {showForm ? (
+                <img src="/addhotel.svg" alt="Close" className="rotate-45" />
+              ) : (
+                <img src="/addhotel.svg" alt="+" />
+              )}
+            </button>
+          )}
         </div>
 
-        {showForm && (
+        {!canWriteReview && (
+          <p className="mt-6 border-t border-[rgba(171,25,46,0.12)] pt-6 font-figma-copy text-[1.2rem] text-[var(--figma-ink-soft)]">
+            <a href="/login" className="figma-link">Sign in</a> to leave a review.
+          </p>
+        )}
+
+        {canWriteReview && showForm && (
           <div className="mt-5 space-y-4 border-t border-[rgba(171,25,46,0.12)] pt-5">
             <div className="flex items-center gap-3">
               <span className="font-figma-copy text-[1.1rem] text-[var(--figma-red)]">
@@ -660,6 +656,11 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   onFocus={refreshActiveFormats}
                   onKeyUp={refreshActiveFormats}
                   onMouseUp={refreshActiveFormats}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData.getData("text/plain");
+                    document.execCommand("insertText", false, text);
+                  }}
                   suppressContentEditableWarning
                   className="min-h-[140px] w-full whitespace-pre-wrap break-words bg-transparent p-4 font-figma-copy text-[1.05rem] text-[var(--figma-ink)] focus:outline-none"
                 />
@@ -687,8 +688,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
               </div>
             </div>
 
-            <DismissibleNotice notice={notice} onClose={dismissNotice} />
-
             <button
               type="button"
               onClick={() => void submit()}
@@ -699,6 +698,8 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             </button>
           </div>
         )}
+
+        <DismissibleNotice notice={notice} onClose={dismissNotice} className="mt-5" />
 
         {!loading && comments.length > 0 && (
           <div className="mt-5 flex gap-2">
@@ -753,6 +754,7 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
                   canDel={canDel(c)}
                   onDelete={(id) => void del(id)}
                   isDeleting={deletingId === c._id}
+                  hotelName={hotelName}
                 />
               ))}
             </div>
@@ -784,12 +786,6 @@ export default function HotelReviews({ hotelId }: { hotelId: string }) {
             )}
           </>
         )}
-
-        {/* {!token && (
-          <p className="mt-6 border-t border-[rgba(171,25,46,0.12)] pt-6 font-figma-copy text-[1.2rem] text-[var(--figma-ink-soft)]">
-            <a href="/login" className="figma-link">Sign in</a> to leave a review.
-          </p>
-        )} */}
       </section>
     </>
   );
