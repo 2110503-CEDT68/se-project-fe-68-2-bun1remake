@@ -32,7 +32,13 @@ test.describe('User Story 2-1',()=>{
     test.describe('Guest Cases (Not Login)', () => {
         test('Acceptance criteria 2-2:Not Login',async ({page})=>{
             test.setTimeout(60000);
-            await openHotelByName(page, 'Four Seasons Chiang Mai');
+            await page.goto('http://localhost:3000/hotel');
+            await page.getByRole('button', { name: 'GOT IT' }).click();
+            await page.getByRole('link', { name: 'HOTELS' }).click();
+            await page.getByRole('textbox', { name: 'Search by hotel name, city,' }).fill('Four Seasons Chiang Mai');
+            const detailLink = page.getByRole('link', { name: 'detail' }).first();
+            await expect(detailLink).toBeVisible();
+            await detailLink.click();
             await page.getByRole('button', { name: 'Write a review' }).click();
             await page.getByRole('button', { name: 'Rate 1' }).click();
             await page.getByRole('textbox', { name: 'Add your comment' }).fill('Suck');
